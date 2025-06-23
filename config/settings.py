@@ -25,10 +25,11 @@ INSTALLED_APPS = [
     'tailwind',
     'django_browser_reload',
     'ui',
+    'core',
 
     # apps...
     'apps.main.apps.MainConfig',
-
+    'apps.account.apps.AccountConfig',
 ]
 
 MIDDLEWARE = [
@@ -45,6 +46,7 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'config.urls'
 WSGI_APPLICATION = 'config.wsgi.application'
+AUTH_USER_MODEL = 'core.User'
 
 TEMPLATES = [
     {
@@ -136,4 +138,6 @@ SILENCED_SYSTEM_CHECKS = ['security.W019']
 
 # Authentification settings
 # ----------------------------------------------------------------------------------------------------------------------
-# ...
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/account/login/'
+LOGIN_URL = '/account/login/'

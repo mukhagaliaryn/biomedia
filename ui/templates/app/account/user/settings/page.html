@@ -1,0 +1,94 @@
+{% extends 'layouts/account_layout.html' %}
+
+{% block title %}
+Баптаулар | Biomedia
+{% endblock title %}
+
+
+{% block account_layout %}
+<div class="grid gap-8">
+    <div>
+        <h2 class="text-xl font-medium mb-4">Парольді өзгерту</h2>
+
+        <form method="post" class="space-y-4 max-w-lg">
+            {% csrf_token %}
+            <input type="hidden" name="change_password" value="1">
+
+            {% if password_form.non_field_errors %}
+            <div class="alert alert-error">{{ password_form.non_field_errors }}</div>
+            {% endif %}
+
+            <div>
+                <label for="{{ form.old_password.id_for_label }}" class="block mb-2 text-sm font-medium text-gray-900">
+                    Қазіргі пароль
+                </label>
+                <input 
+                    type="password" 
+                    id="{{ form.old_password.id_for_label }}"
+                    name="old_password"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-green-500 focus:border-green-500 block w-full p-2.5"
+                    required 
+                />
+                {% for error in form.old_password.errors %}
+                    <p class="text-sm text-red-800">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <div>
+                <label for="{{ form.new_password1.id_for_label }}" class="block mb-2 text-sm font-medium text-gray-900">
+                    Жаңа пароль
+                </label>
+                <input 
+                    type="password" 
+                    id="{{ form.new_password1.id_for_label }}"
+                    name="new_password1"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-green-500 focus:border-green-500 block w-full p-2.5"
+                    required 
+                />
+                {% for error in form.new_password1.errors %}
+                    <p class="text-sm text-red-800">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <div>
+                <label for="{{ form.new_password2.id_for_label }}" class="block mb-2 text-sm font-medium text-gray-900">
+                    Жаңа пароль
+                </label>
+                <input 
+                    type="password" 
+                    id="{{ form.new_password2.id_for_label }}"
+                    name="new_password2"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-green-500 focus:border-green-500 block w-full p-2.5"
+                    required 
+                />
+                {% for error in form.new_password2.errors %}
+                    <p class="text-sm text-red-800">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <button 
+                type="submit" 
+                class="cursor-pointer focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg px-5 py-2.5"
+            >
+                Құпиясөзді өзгерту
+            </button>
+        </form>
+    </div>
+
+    <div>
+        <h2 class="text-xl font-medium mb-4">Аккаунтты жою</h2>
+
+        <form 
+            method="post" 
+            onsubmit="return confirm('Аккаунтты расымен жойғыңыз келе ме?')"
+            class="space-y-4 max-w-lg"    
+        >
+            {% csrf_token %}
+            <input type="hidden" name="delete_account" value="1">
+            <button type="submit" class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5">
+                Аккаунтты жою
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock account_layout %}

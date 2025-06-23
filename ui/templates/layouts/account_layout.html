@@ -1,0 +1,26 @@
+{% extends 'layouts/main_layout.html' %}
+
+
+{% block main_layout %}
+    <div class="flex items-start gap-8">
+        <div class="max-w-64 w-full hidden md:block">
+            <ul class="grid gap-1">
+                <li>
+                    <a href="{% url 'account_view' %}" class="py-2 px-4 w-full block hover:bg-green-100 rounded-lg {% if request.path == '/account/user/me/' %}bg-green-600 hover:bg-green-600 text-white{% endif %}">
+                        Аккаунт
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'settings_view' %}" class="py-2 px-4 w-full block hover:bg-green-100 rounded-lg {% if request.path == '/account/user/settings/' %}bg-green-600 hover:bg-green-600 text-white{% endif %}">
+                        Баптаулар
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="flex-1">
+            {% block account_layout %}
+            {% endblock account_layout %}
+        </div>
+    </div>
+{% endblock main_layout %}

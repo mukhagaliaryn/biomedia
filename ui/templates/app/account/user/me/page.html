@@ -1,0 +1,77 @@
+{% extends 'layouts/account_layout.html' %}
+{% load static %}
+
+{% block title %}
+{% if user.first_name and user.last_name %}{{ user.first_name }} {{ user.last_name }}{% else %}{{ user.username }}{% endif %} | Biomedia
+{% endblock title %}
+
+
+{% block account_layout %}
+<h2 class="text-xl font-medium mb-4">Аккаунт</h2>
+
+<form method="post" enctype="multipart/form-data" class="space-y-4 max-w-lg">
+    {% csrf_token %}
+
+    <div>
+        {% if user.avatar %}
+            <img src="{{ user.avatar.url }}" alt="Avatar" class="w-36 h-36 mx-auto rounded-full">
+        {% else %}
+            <img src="{% static 'images/user-avatar.jpg' %}" alt="Avatar" class="w-36 h-36 mx-auto rounded-full">
+            <label class="block mb-2 text-sm font-medium text-gray-900" for="{{ form.avatar.id_for_label }}">
+                Суретті жүтеу
+            </label>
+            <input
+                class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50" 
+                id="{{ form.avatar.id_for_label }}" 
+                name="avatar"
+                value="{{ form.avatar.value }}"
+                type="file"
+            />
+            {% for error in form.avatar.errors %}
+                <p class="text-sm text-red-800">{{ error }}</p>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <div>
+        <label for="{{ form.first_name.id_for_label }}" class="block mb-2 text-sm font-medium text-gray-900">
+            Есімі
+        </label>
+        <input 
+            type="text"
+            id="{{ form.first_name.id_for_label }}"
+            name="first_name"
+            value="{{ form.first_name.value }}"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-green-500 focus:border-green-500 block w-full p-2.5"
+            required 
+        />
+        {% for error in form.first_name.errors %}
+            <p class="text-sm text-red-800">{{ error }}</p>
+        {% endfor %}
+    </div>
+
+    <div>
+        <label for="{{ form.last_name.id_for_label }}" class="block mb-2 text-sm font-medium text-gray-900">
+            Тегі
+        </label>
+        <input 
+            type="text"
+            id="{{ form.last_name.id_for_label }}"
+            name="last_name"
+            value="{{ form.last_name.value }}"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-green-500 focus:border-green-500 block w-full p-2.5"
+            required 
+        />
+        {% for error in form.last_name.errors %}
+            <p class="text-sm text-red-800">{{ error }}</p>
+        {% endfor %}
+    </div>
+
+    <button 
+        type="submit" 
+        class="cursor-pointer focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg px-5 py-2.5"
+    >
+        Сақтау
+    </button>
+</form>
+{% endblock account_layout %}
