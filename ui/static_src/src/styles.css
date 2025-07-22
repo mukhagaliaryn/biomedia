@@ -2,6 +2,7 @@
 @import "flowbite/src/themes/default";
 @plugin "flowbite/plugin";
 @source "../node_modules/flowbite";
+@plugin "daisyui";
 
 @theme {
   --font-inter: "Inter Tight", "sans-serif"; 

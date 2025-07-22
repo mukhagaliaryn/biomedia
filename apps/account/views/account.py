@@ -7,6 +7,8 @@ from django.utils.translation import gettext_lazy as _
 from apps.account.forms import UserUpdateForm
 
 
+# account page
+# ----------------------------------------------------------------------------------------------------------------------
 @login_required
 def account_view(request):
     user = request.user
@@ -23,6 +25,8 @@ def account_view(request):
     return render(request, 'app/account/user/me/page.html', context)
 
 
+# settings page
+# ----------------------------------------------------------------------------------------------------------------------
 @login_required
 def settings_view(request):
     user = request.user
