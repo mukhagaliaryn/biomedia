@@ -7,16 +7,17 @@ from apps.account.forms import UserRegisterForm
 
 
 # login page
+# ----------------------------------------------------------------------------------------------------------------------
 def login_view(request):
     if request.user.is_authenticated:
-        return redirect('main_view')
+        return redirect('student')
 
     if request.method == 'POST':
         form = AuthenticationForm(data=request.POST)
         if form.is_valid():
             user = form.get_user()
             login(request, user)
-            return redirect('main_view')
+            return redirect('student')
         else:
             messages.error(request, _('Пайдаланушының аты немесе пароль қате кетті!'))
     else:
@@ -26,16 +27,17 @@ def login_view(request):
 
 
 # register page
+# ----------------------------------------------------------------------------------------------------------------------
 def register_view(request):
     if request.user.is_authenticated:
-        return redirect('main_view')
+        return redirect('student')
 
     if request.method == 'POST':
         form = UserRegisterForm(request.POST)
         if form.is_valid():
             user = form.save()
             login(request, user)
-            return redirect('main_view')
+            return redirect('student')
         else:
             messages.error(request, _('Тіркеу сәтсіз аяқталды. Деректерді тексеріңіз!'))
     else:
@@ -45,6 +47,7 @@ def register_view(request):
 
 
 # logout
+# ----------------------------------------------------------------------------------------------------------------------
 def logout_view(request):
     logout(request)
-    return redirect('login_view')
+    return redirect('login')

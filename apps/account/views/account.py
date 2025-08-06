@@ -16,8 +16,8 @@ def account_view(request):
         form = UserUpdateForm(request.POST, request.FILES, instance=user)
         if form.is_valid():
             form.save()
-            messages.success(request, _('Профиль сәтті жаңартылды.'))
-            return redirect('account_view')
+            messages.success(request, _('Профиль сәтті жаңартылды'))
+            return redirect('account')
     else:
         form = UserUpdateForm(instance=user)
 
@@ -39,15 +39,16 @@ def settings_view(request):
                 password_form.save()
                 update_session_auth_hash(request, user)
                 messages.success(request, _('Құпиясөз сәтті өзгертілді'))
-                return redirect('settings_view')
+                return redirect('settings')
             else:
-                messages.error(request, _('Қате! Құпиясөз өзгертілмеді.'))
+                messages.error(request, _('Қате! Құпиясөз өзгертілмеді'))
 
         elif 'delete_account' in request.POST:
             user.delete()
             messages.success(request, _('Аккаунт жойылды'))
-            return redirect('login_view')
+            return redirect('login')
 
-    return render(request, 'app/account/user/settings/page.html', {
+    context = {
         'password_form': password_form
-    })
+    }
+    return render(request, 'app/account/user/settings/page.html', context)

@@ -1,0 +1,139 @@
+{% extends 'layouts/base_layout.html' %}
+{% load static %}
+{% load user_lessons_by_chapter %}
+
+{% block base_layout %}
+<div class="flex items-start p-8 gap-8">
+    <div class="flex-1">
+        {% block lesson_layout %}
+        {% endblock lesson_layout %}
+    </div>
+
+    <div 
+        id="accordion-collapse" 
+        data-accordion="collapse" 
+        data-active-classes="text-foreground"
+        data-inactive-classes="te"
+        class="max-w-md w-full border border-border-200 rounded-xl overflow-hidden"
+    >
+        {% for uc in user_chapters %}
+            <h2 id="accordion-collapse-heading-{{ uc.id }}">
+                <button 
+                    type="button"
+                    class="flex items-center justify-between w-full p-4 font-semibold bg-white border-b border-border-200"
+                    data-accordion-target="#accordion-collapse-body-{{ uc.id }}" 
+                    aria-expanded="true"
+                    aria-controls="accordion-collapse-body-{{ uc.id }}"
+                >
+                    <div class="flex gap-2 items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+                            class="lucide lucide-folder-open-icon lucide-folder-open">
+                            <path
+                                d="m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2" />
+                        </svg>
+                        <span>{{ uc.chapter.name }}</span>
+                    </div>
+                    
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+                        data-accordion-icon
+                        class="lucide lucide-chevron-up-icon lucide-chevron-up rotate-180 shrink-0">
+                        <path d="m18 15-6-6-6 6" />
+                    </svg>
+                </button>
+            </h2>
+            <div
+                id="accordion-collapse-body-{{ uc.id }}" 
+                class="hidden" 
+                aria-labelledby="accordion-collapse-heading-{{ uc.id }}"
+            >
+                <div class="grid gap-2 p-4 bg-secondary-100">
+                    {% with user_lessons_by_chapter|dict_get:uc.chapter.id as chapter_user_lessons %}
+                        {% for ul in chapter_user_lessons %}
+                            {% if ul.status == 'in-progress' or ul.status == 'finished' %}
+                                {% url 'user_lesson' user_subject.id uc.id ul.id as lesson_url %}
+                                <a
+                                    href="{{ lesson_url }}"
+                                    class="flex justify-between border border-secondary-200 rounded-lg p-4 {% if request.path == lesson_url %}bg-primary-700 text-white{% else %}bg-white{% endif %}"
+                                >
+                                    <div class="flex items-start gap-4">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                                            class="lucide lucide-presentation-icon lucide-presentation">
+                                            <path d="M2 3h20" />
+                                            <path d="M21 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3" />
+                                            <path d="m7 21 5-5 5 5" />
+                                        </svg>
+
+                                        <div class="grid flex-1">
+                                            <h1 class="font-medium line-clamp-1">{{ ul.lesson.title }}</h1>
+                                        </div>
+                                    </div>
+
+                                    <div class="relative">
+                                        <div 
+                                            class="radial-progress bg-secondary-100 text-xs text-primary-700" 
+                                            style="--value:86; --size: 2.5rem;" 
+                                            aria-valuenow="70" 
+                                            role="progressbar"
+                                        >
+                                            86%
+                                        </div>
+                                    </div>
+                                </a>
+                            {% else %}
+                                <div
+                                    class="flex gap-2 items-center justify-between border border-secondary-200 rounded-lg p-4 {% if request.path == lesson_url %}bg-primary-700 text-white{% else %}bg-white{% endif %}"
+                                >
+                                    <div class="flex items-start gap-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-lock-icon lucide-lock">
+                                            <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+                                            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                                        </svg>
+
+                                        <div class="grid flex-1">
+                                            <h1 class="font-medium line-clamp-1">{{ ul.lesson.title }}</h1>
+                                        </div>
+
+                                        <div class="flex gap-1 items-center">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-clock-icon lucide-clock">
+                                                <path d="M12 6v6l4 2" />
+                                                <circle cx="12" cy="12" r="10" />
+                                            </svg>
+                                            <span>{{ ul.lesson.duration }}:00</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        {% empty %}
+                            <div class="flex gap-2 justify-center text-center text-muted p-4">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+                                    class="lucide lucide-presentation-icon lucide-presentation">
+                                    <path d="M2 3h20" />
+                                    <path d="M21 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3" />
+                                    <path d="m7 21 5-5 5 5" />
+                                </svg>
+                                <span>Бөлім сабақтары қосылмаған</span>
+                            </div>
+                        {% endfor %}
+                    {% endwith %}
+                </div>
+            </div>
+        {% empty %}
+            <div class="flex gap-2 justify-center text-center text-muted p-4">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-folder-open-icon lucide-folder-open">
+                    <path
+                        d="m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2" />
+                </svg>
+                <span>Пәннің бөлімдері қосылмаған</span>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock base_layout %}

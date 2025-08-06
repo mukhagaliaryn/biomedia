@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 from decouple import config
+from django.contrib import messages
 from django.utils.translation import gettext_lazy as _
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -29,8 +30,9 @@ INSTALLED_APPS = [
     'core',
 
     # apps...
-    'apps.main.apps.MainConfig',
     'apps.account.apps.AccountConfig',
+    'apps.dashboard.student.apps.StudentConfig',
+    'apps.dashboard.teacher.apps.TeacherConfig',
 ]
 
 MIDDLEWARE = [
@@ -123,7 +125,20 @@ STATICFILES_DIRS = [
     BASE_DIR / 'ui/static'
 ]
 
+
+# Templates settings
+# ----------------------------------------------------------------------------------------------------------------------
 TAILWIND_APP_NAME = 'ui'
+
+# Messages
+MESSAGE_STORAGE = "django.contrib.messages.storage.session.SessionStorage"
+
+MESSAGE_TAGS = {
+    messages.SUCCESS: 'text-green-600',
+    messages.WARNING: 'text-amber-600',
+    messages.INFO: 'text-blue-600',
+    messages.ERROR: 'text-red-600',
+}
 
 
 # Default primary key field type

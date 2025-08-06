@@ -1,0 +1,318 @@
+{% extends "layouts/base_layout.html" %}
+{% load static %}
+
+{% block title %}Басқару панелі{% endblock title %}
+
+
+{% block base_layout %}
+<div class="max-w-screen-xl mx-auto grid gap-8 py-6 px-4">
+    <!-- Student full name -->
+    <div class="text-center grid gap-2">
+        {% if user.avatar %}
+            <img 
+                class="w-28 h-28 rounded-full mx-auto"
+                src="{{ user.avatar.url }}" alt="user photo"
+            >
+        {% else %}
+            <div 
+                id="avatar-preview"
+                class="w-28 h-28 mx-auto rounded-full bg-secondary-100 flex items-center justify-center text-foreground text-4xl"
+            >
+                {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
+            </div>
+        {% endif %}
+        <h1 class="text-2xl font-medium" role="none">
+            👋, {{ user.first_name }} {{ user.last_name }}
+        </h1>
+        <div class="flex justify-center">
+            <span class="flex items-center gap-1 bg-primary-100 text-primary-800 font-semibold px-2.5 py-0.5 rounded-sm">
+                <div class="w-2 h-2 rounded-full bg-primary-800"></div>
+                {{ user.get_user_type_display }}
+            </span>
+        </div>
+    </div>
+
+    <!-- Statictics -->
+    <div class="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3">
+        <div class="block text-center p-6 bg-white border border-secondary-200 rounded-lg hover:bg-secondary-100">
+            <h5 class="mb-2 text-4xl font-semibold tracking-tight">{{ statistics.in_process }}</h5>
+            <p class="font-normal text-muted">өтіліп жатқан пәндер</p>
+        </div>
+
+        <div class="block text-center p-6 bg-white border border-secondary-200 rounded-lg hover:bg-secondary-100">
+            <h5 class="mb-2 text-4xl font-semibold tracking-tight">{{ statistics.completed }}</h5>
+            <p class="font-normal text-muted">аяқталған пәндер</p>
+        </div>
+
+        <div class="block text-center p-6 bg-white border border-neutral-200 rounded-lg hover:bg-secondary-100">
+            <h5 class="mb-2 text-4xl font-semibold tracking-tight">45%</h5>
+            <p class="font-normal text-muted">жалпы пәндер бағасы</p>
+        </div>
+    </div>
+
+
+    <!-- User lessons  -->
+    <div class="mb-4 border-b border-border-200">
+        <!-- Tab trigger -->
+        <ul 
+            class="flex flex-wrap -mb-px text-sm font-medium text-center" 
+            id="default-tab" 
+            data-tabs-toggle="#default-tab-content" role="tablist"
+            data-tabs-inactive-classes="text-muted border-transparent hover:border-b-border-200"
+            data-tabs-active-classes="text-primary-700 hover:text-primary-700 border-primary-700"
+        >
+            <!-- user subjects -->
+            <li class="me-2" role="presentation">
+                <button class="inline-block p-4 border-b-2 rounded-t-lg" id="user-subject-tab" data-tabs-target="#user-subject" type="button" role="tab" aria-controls="user-subject" aria-selected="false">
+                    Менің пәндерім
+                </button>
+            </li>
+            <!-- all subjects -->
+            <li class="me-2" role="presentation">
+                <button class="inline-block p-4 border-b-2 rounded-t-lg" id="subjects-tab" data-tabs-target="#subjects" type="button" role="tab" aria-controls="subjects" aria-selected="false">
+                    Ашық пәндер
+                </button>
+            </li>
+        </ul>
+    </div>
+    <!-- Tab content -->
+    <div id="default-tab-content">
+        <!-- user subjects -->
+        <div class="hidden" id="user-subject" role="tabpanel" aria-labelledby="user-subject-tab">
+            <div class="grid gap-4">
+                <div class="hidden lg:flex gap-4">
+                    <div class="flex-1 flex items-center justify-between">
+                        <h5 class="text-base font-semibold leading-none">Өтіліп жатқан пәндер</h5>
+                    </div>
+
+                    <div class="max-w-sm w-full flex items-center justify-between">
+                        <h5 class="text-base font-semibold leading-none">Білім алушылар</h5>
+                    </div>
+                </div>
+
+                <div class="grid gap-4">
+                    {% for item in subject_list %}
+                        {% if item.user_subject %}
+                            <div class="flex flex-col lg:flex-row rounded-lg border border-border-200">
+                                <a 
+                                    href="{% url 'user_lesson' item.user_subject.id item.first_chapter_id item.first_lesson_id %}"
+                                    class="flex-1 grid gap-4"
+                                >
+                                    <div class="flex items-start gap-4 p-4 lg:border-r border-border-200 hover:bg-secondary-50">
+                                        <div class="max-w-xs w-full rounded-lg overflow-hidden">
+                                            {% if item.subject.poster %}
+                                                <img
+                                                    src="{{ item.subject.poster.url }}"
+                                                    class="aspect-video flex justify-center items-center text-muted bg-secondary-100" 
+                                                />
+                                            {% else %}
+                                                <div class="aspect-video flex justify-center items-center text-muted bg-secondary-100">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                        stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-box-icon lucide-box">
+                                                        <path
+                                                            d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
+                                                        <path d="m3.3 7 8.7 5 8.7-5" />
+                                                        <path d="M12 22V12" />
+                                                    </svg>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+
+                                        <div class="flex-1 grid gap-4">
+                                            <div>
+                                                <h1 class="text-xl font-semibold">{{ item.user_subject.subject.name }}</h1>
+                                                <span class="text-muted">
+                                                    ID нөмерлер: пән - {{ item.user_subject.id }}, бөлім - {{ item.first_chapter_id }}, сабақ - {{ item.first_lesson_id }}
+                                                </span>
+                                            </div>
+
+                                            <div class="flex gap-4 justify-between">
+                                                <div  class="text-center">
+                                                    <div class="radial-progress bg-secondary-100 text-base text-primary-700 mb-2" style="--value:12; --size: 4rem;" aria-valuenow="70" role="progressbar">12%</div>
+                                                    <p class="text-muted">Пән бойынша</p>
+                                                </div>
+
+                                                <div  class="text-center">
+                                                    <div class="radial-progress bg-secondary-100 text-base text-primary-700 mb-2" style="--value:37; --size: 4rem;" aria-valuenow="70" role="progressbar">37%</div>
+                                                    <p class="text-muted">Бөлім бойынша</p>
+                                                </div>
+
+                                                <div  class="text-center">
+                                                    <div class="radial-progress bg-secondary-100 text-base text-primary-700 mb-2" style="--value:86; --size: 4rem;" aria-valuenow="70" role="progressbar">86%</div>
+                                                    <p class="text-muted">Сабақ бойынша</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+
+                                <div class="w-full lg:max-w-sm grid gap-2">
+                                    {% for student in students %}
+                                        <div class="flex items-center py-2 px-4 border-b border-secondary-200">
+                                            <div class="shrink-0">
+                                                {% if student.user.avatar %}
+                                                    <img 
+                                                        class="w-8 h-8 rounded-full"
+                                                        src="{{ student.user.avatar.url }}" alt="user photo"
+                                                    >
+                                                {% else %}
+                                                    <div 
+                                                        class="w-8 h-8 rounded-full bg-secondary-100 flex items-center justify-center text-foreground"
+                                                    >
+                                                        {{ student.user.first_name|first|upper }}{{ student.user.last_name|first|upper }}
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                            <div class="flex-1 min-w-0 ms-4">
+                                                <h1 class="text-base font-medium truncate">{{ student.user.first_name }} {{ student.user.last_name }}</h1>
+                                                <p class="text-muted truncate ">{{ student.user.email }}</p>
+                                            </div>
+                                                
+                                            <div 
+                                                class="radial-progress bg-secondary-100 text-xs text-primary-700" 
+                                                style="--value:70; --size: 3rem;" 
+                                                aria-valuenow="70" role="progressbar"
+                                            >
+                                                70%
+                                            </div>
+                                        </div>
+                                    {% empty %}
+                                        <div class="flex items-center justify-center py-4">
+                                            <div class="grid gap-2 text-muted">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                    stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+                                                    class="lucide lucide-user-round-icon lucide-user-round mx-auto">
+                                                    <circle cx="12" cy="8" r="5" />
+                                                    <path d="M20 21a8 8 0 0 0-16 0" />
+                                                </svg>
+                                                <span>Әлі ешкім тіркелген жоқ!</span>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="flex justify-center py-8">
+                                <div class="grid gap-2 text-muted">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-box-icon lucide-box mx-auto">
+                                        <path
+                                            d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
+                                        <path d="m3.3 7 8.7 5 8.7-5" />
+                                        <path d="M12 22V12" />
+                                    </svg>
+                                    <span>Сіз ешқандай пәндер тіркелмегенсіз</span>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- all subjects -->
+        <div class="hidden" id="subjects" role="tabpanel" aria-labelledby="subjects-tab">
+            <div class="grid">
+                {% if subject_list %}
+                    <div class="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                        {% for item in subject_list %}
+                            <div
+                                class="rounded-lg border border-secondary-200 overflow-hidden hover:shadow"
+                            >
+                                <a 
+                                    href="{% url 'subject_detail' item.subject.id %}" 
+                                    class="block aspect-video"
+                                >
+                                    <div class="bg-secondary-100 w-full h-full flex justify-center items-center text-muted">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-box-icon lucide-box">
+                                            <path
+                                                d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
+                                            <path d="m3.3 7 8.7 5 8.7-5" />
+                                            <path d="M12 22V12" />
+                                        </svg>
+                                    </div>
+                                </a>
+                                
+                                <div class="p-4">
+                                    <a 
+                                        href="{% url 'subject_detail' item.subject.id %}" 
+                                        class="grid gap-2 pb-2"
+                                    >
+                                        <h1 class="text-base font-semibold line-clamp-1">{{ item.subject.name }}</h1>
+                                        <div class="flex items-center gap-4">
+                                            <div class="flex gap-2 items-center">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                    stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+                                                    class="lucide lucide-folder-open-icon lucide-folder-open">
+                                                    <path
+                                                        d="m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2" />
+                                                </svg>
+                                                <span class="text-muted">{{ item.subject.chapters.count }} бөлім</span>
+                                            </div>
+                                            <div class="flex gap-2 items-center">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                    stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+                                                    class="lucide lucide-folder-open-icon lucide-folder-open">
+                                                    <path
+                                                        d="m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2" />
+                                                </svg>
+                                                <span class="text-muted">{{ item.subject.lessons.count }} сабақ</span>
+                                            </div>
+                                        </div>
+                                    </a>
+
+                                    <div class="flex gap-2">
+                                        {% if item.user_subject %}
+                                            <a 
+                                                href="{% url 'user_lesson' item.user_subject.id item.first_chapter_id item.first_lesson_id %}" 
+                                                class="flex gap-2 justify-center items-center w-full text-center cursor-pointer focus:outline-none bg-secondary-100 hover:bg-secondary-200 focus:ring-4 focus:ring-secondary-300 font-medium rounded-lg px-5 py-2.5"
+                                            >
+                                                <span>Сабаққа кіру</span>
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                    stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+                                                    class="lucide lucide-arrow-right-icon lucide-arrow-right">
+                                                    <path d="M5 12h14" />
+                                                    <path d="m12 5 7 7-7 7" />
+                                                </svg>
+                                            </a>
+                                        {% else %}
+                                            <form action="{% url 'enroll_subject' item.subject.id %}" method="post" class="w-full">
+                                                {% csrf_token %}
+                                                <button
+                                                    type="submit"
+                                                    class="flex gap-2 justify-center items-center w-full text-center cursor-pointer focus:outline-none text-white bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg px-5 py-2.5"
+                                                >
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                        stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus-icon lucide-plus">
+                                                        <path d="M5 12h14" />
+                                                        <path d="M12 5v14" />
+                                                    </svg>
+                                                    <span>Пәнге жазылу</span>
+                                                </button>
+                                            </form>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="flex justify-center py-8">
+                        <div class="grid gap-2 text-muted">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-box-icon lucide-box mx-auto">
+                                <path
+                                    d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
+                                <path d="m3.3 7 8.7 5 8.7-5" />
+                                <path d="M12 22V12" />
+                            </svg>
+                            <span>Сізді ешқандай пәндер тіркелмеген</span>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock base_layout %}

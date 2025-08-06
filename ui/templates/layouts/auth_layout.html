@@ -2,15 +2,21 @@
 {% load static %}
 
 {% block content %}
-<div class="py-16 grid gap-8">
-    <div class="flex max-w-xs mx-auto items-end gap-2">
-        <img src="{% static 'images/logo.png' %}" alt="Biomedia Logo" class="w-16 mx-auto">
-        <h1 class="text-3xl font-bold">media</h1>
-    </div>
+<div class="w-full h-screen overflow-auto flex justify-center py-8 px-4 sm:px-0 sm:py-16 items-start bg-background">
+    <div class="max-w-md w-full grid gap-4">
+        <div class="relative">
+            <a 
+                href="{% url 'student' %}"
+                class="w-52 mx-auto overflow-hidden block"    
+            >
+                <img src="{% static 'images/logo.svg' %}" alt="Logo" class="w-full">
+            </a>
+        </div>
 
-    <div class="max-w-sm w-full mx-auto grid gap-8">
-        {% block auth_layout %}
-        {% endblock auth_layout %}
+        <div class="relative">
+            {% block auth_layout %}
+            {% endblock auth_layout %}
+        </div>
     </div>
 </div>
 {% endblock %}

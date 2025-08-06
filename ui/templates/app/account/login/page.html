@@ -2,63 +2,72 @@
 
 
 {% block title %}
-    Жүйеге кіру | Biomedia
+    Жүйеге кіру
 {% endblock title %}
 
 
 {% block auth_layout %}
-<h1 class="text-2xl md:text-4xl font-medium text-center">Қайта оралуыңмен!</h1>
-<form method="post" class="grid gap-4">
-    {% csrf_token %}
-    <div class="grid gap-2">
-        <div>
-            <label for="{{ form.username.id_for_label }}" class="block mb-2 text-sm font-medium text-gray-900">
-                Пайдаланушының аты
-            </label>
-            <input 
-                type="text"
-                id="{{ form.username.id_for_label }}"
-                name="username"
-                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-green-500 focus:border-green-500 block w-full p-2.5"
-                placeholder="user.name" 
-                required 
-            />
-            <p class="text-sm text-red-800">{{ form.username.errors }}</p>
-        </div>
-
-        <div>
-            <label for="{{ form.password.id_for_label }}" class="block mb-2 text-sm font-medium text-gray-900">
-                Пароль
-            </label>
-            <input 
-                type="password" 
-                id="{{ form.password.id_for_label }}"
-                name="password"
-                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-green-500 focus:border-green-500 block w-full p-2.5"
-                required 
-            />
-            <p class="text-sm text-red-800">{{ form.username.errors }}</p>
-        </div>
+<div class="grid gap-8">
+    <div class="text-center">
+        <h1 class="text-xl md:text-2xl font-medium">Қайта оралуыңмен!</h1>
+        <span class="text-muted">Тіркелген электронды пошта және пароль арқылу жүйеге кіру</span>
     </div>
 
-    <div class="grid gap-2">
-        <button 
-            type="submit" 
-            class="cursor-pointer focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg px-5 py-2.5"
-        >
-            Жүйеге кіру
-        </button>
-    </div>
-</form>
-<div class="flex items-center justify-center gap-2">
-    <span class="text-gray-500">Аккаунта жоқ па?</span>
-    <a href="{% url 'register_view' %}" class="inline-flex items-center font-medium text-green-600 hover:underline">
+    <form method="post" class="grid gap-4">
+        {% csrf_token %}
+        <div class="grid gap-4">
+            <div class="relative">
+                <label for="{{ form.username.id_for_label }}" class="block mb-2 text-sm font-medium">
+                    Пайдаланушының аты
+                </label>
+                <input 
+                    type="text"
+                    id="{{ form.username.id_for_label }}"
+                    name="username"
+                    class="block w-full p-2.5 border border-border-300 text-foreground text-sm rounded-lg focus:ring-primary-700 focus:border-primary-700"
+                    placeholder="user.name" 
+                    required 
+                />
+                {% if form.username.errors %}
+                    {% for error in form.username.errors %}
+                        <p class="text-sm text-destructive">{{ error }}</p>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            <div class="relative">
+                <label for="{{ form.password.id_for_label }}" class="block mb-2 text-sm font-medium">
+                    Пароль
+                </label>
+                <input 
+                    type="password" 
+                    id="{{ form.password.id_for_label }}"
+                    name="password"
+                    class="block w-full p-2.5 border border-border-300 text-foreground text-sm rounded-lg focus:ring-primary-700 focus:border-primary-700"
+                    required 
+                />
+                {% if form.password.errors %}
+                    {% for error in form.password.errors %}
+                        <p class="text-sm text-destructive">{{ error }}</p>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="grid gap-2">
+            <button 
+                type="submit" 
+                class="cursor-pointer focus:outline-none transition-all text-white bg-primary-700 hover:bg-primary-800 focus:ring-3 focus:ring-primary-300 font-medium rounded-lg px-5 py-2.5"
+            >
+                Жүйеге кіру
+            </button>
+        </div>
+    </form>
+    <a 
+        href="{% url 'register' %}"
+        class="w-full flex justify-center focus:outline-none transition-all bg-white border border-border-300 hover:bg-secondary-100 focus:ring-3 focus:ring-secondary-300 font-medium rounded-lg px-3 py-2"
+    >
         Регистрация
-        <svg class="w-4 h-4 ms-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
-            viewBox="0 0 14 10">
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M1 5h12m0 0L9 1m4 4L9 9" />
-        </svg>
     </a>
 </div>
 {% endblock auth_layout %}

@@ -1,3 +1,6 @@
 from .account import *
-from .main import *
+from .subjects import *
+from .tasks import *
+from .contents import *
+
 from .progress import *
