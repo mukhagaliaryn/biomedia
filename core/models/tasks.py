@@ -7,8 +7,9 @@ from core.models import Lesson
 # ----------------------------------------------------------------------------------------------------------------------
 class Task(models.Model):
     TASK_TYPE = (
+        ('video', _('Видеосабақ')),
         ('written', _('Жазбаша')),
-        ('text_gap', _('Сөйлемді аяқтау')),
+        ('text_gap', _('Толықтыру')),
         ('test', _('Тест')),
         ('matching', _('Сәйкестендіру')),
     )
@@ -30,6 +31,26 @@ class Task(models.Model):
         ordering = ('order', )
 
 
+# Task type: Video model
+# ----------------------------------------------------------------------------------------------------------------------
+class Video(models.Model):
+    task = models.ForeignKey(
+        Task, on_delete=models.CASCADE, null=True,
+        verbose_name=_('Контент'), related_name='videos'
+    )
+    url = models.URLField(_('URL сілтеме'))
+    duration = models.PositiveSmallIntegerField(_('Видео уақыт'), default=0)
+    order = models.PositiveIntegerField(_('Реттілік нөмері'), default=0)
+
+    def __str__(self):
+        return f'{self.pk} - видеосабақ'
+
+    class Meta:
+        verbose_name = _('Видеосабақ')
+        verbose_name_plural = _('Видеосабақтар')
+        ordering = ('order', )
+
+
 # Task type: Written model
 # ----------------------------------------------------------------------------------------------------------------------
 class Written(models.Model):
@@ -40,11 +61,11 @@ class Written(models.Model):
     instruction = models.TextField(_('Тапсырма'), blank=True, null=True)
 
     def __str__(self):
-        return f'{self.pk} - жазбаша тапсырма'
+        return f'{self.pk} - жазбаша'
 
     class Meta:
         verbose_name = _('Жазбаша')
-        verbose_name_plural = _('Жазбаша тапсырмалар')
+        verbose_name_plural = _('Жазбашалар')
 
 
 # Task type: TextGap model
@@ -54,43 +75,28 @@ class TextGap(models.Model):
         Task, on_delete=models.CASCADE,
         related_name='text_gaps', verbose_name=_('Сабақ')
     )
-    prompt = models.TextField(_('Сөйлем (көп нүктемен)'))  # "..." белгісімен жазылады
+    prompt = models.TextField(_('Сөйлем (көп нүктемен)'))
     correct_answer = models.CharField(_('Дұрыс жауап'), max_length=255)
 
     def __str__(self):
-        return f'{self.pk} - сөйлемді аяқтау тапсырмасы'
+        return f'{self.pk} - толықтыру'
 
     class Meta:
-        verbose_name = _('Сөйлемді аяқтау тапсырмасы')
-        verbose_name_plural = _('Сөйлемді аяқтау тапсырмалары')
+        verbose_name = _('Толықтыру')
+        verbose_name_plural = _('Толықтырулар')
 
 
 # Task type: Test model
 # ----------------------------------------------------------------------------------------------------------------------
-class Test(models.Model):
-    task = models.ForeignKey(
-        Task, on_delete=models.CASCADE,
-        related_name='tests', verbose_name=_('Тапсырма')
-    )
-    instruction = models.TextField(_('Тест'), blank=True, null=True)
-
-    def __str__(self):
-        return f'{self.pk} - тест'
-
-    class Meta:
-        verbose_name = _('Тест')
-        verbose_name_plural = _('Тесттер')
-
-
 # Question model
 class Question(models.Model):
     QUESTION_TYPE = (
         ('simple', _('Бір жауапты')),
         ('multiple', _('Көп жауапты')),
     )
-    test = models.ForeignKey(
-        Test, on_delete=models.CASCADE,
-        related_name='questions', verbose_name=_('Тест')
+    task = models.ForeignKey(
+        Task, on_delete=models.CASCADE, null=True,
+        related_name='questions', verbose_name=_('Тапсырма')
     )
     text = models.TextField(_('Сұрақ'))
     question_type = models.CharField(_('Сұрақтың түрі'), choices=QUESTION_TYPE, default='simple', max_length=32)
@@ -113,45 +119,30 @@ class Option(models.Model):
     )
     text = models.TextField(_('Жауап'), blank=True, null=True)
     is_correct = models.BooleanField(_('Дұрыс жауап'), default=False)
-    score = models.PositiveIntegerField(_('Жауап баллы'), default=0)
+    score = models.PositiveIntegerField(_('Балл'), default=0)
 
     def __str__(self):
         return f'Тест: {self.pk} - жауап'
 
     class Meta:
-        verbose_name = _('Жауап нұсқасы')
-        verbose_name_plural = _('Жауап нұсқалары')
+        verbose_name = _('Жауап')
+        verbose_name_plural = _('Жауаптар')
 
 
 # Task type: Matching model
 # ----------------------------------------------------------------------------------------------------------------------
-class Matching(models.Model):
+# Pair
+class Pair(models.Model):
     task = models.ForeignKey(
-        Task, on_delete=models.CASCADE,
-        related_name='identifications', verbose_name=_('Тапсырма')
+        Task, on_delete=models.CASCADE, null=True,
+        related_name='matching_pairs', verbose_name=_('Тапсырма')
     )
-    instruction = models.TextField(_('Сұрақ'), blank=True, null=True)
+    left_item = models.CharField(_('Сол жақ'), max_length=255)
+    right_item = models.CharField(_('Оң жақ'), max_length=255)
 
     def __str__(self):
-        return f'{self.pk} - сәкестендіру тапсырмасы'
+        return f'{self.left_item} == {self.right_item}'
 
     class Meta:
         verbose_name = _('Сәйкестендіру')
         verbose_name_plural = _('Сәйкестендірулер')
-
-
-# Pair
-class Pair(models.Model):
-    matching = models.ForeignKey(
-        Matching, on_delete=models.CASCADE,
-        related_name='pairs', verbose_name=_('Сәйкестендіру')
-    )
-    left_item = models.CharField(_('Сол жақ'), max_length=255)
-    right_item = models.CharField(_('Оң жақ (дұрыс жауап)'), max_length=255)
-
-    def __str__(self):
-        return f'{self.left_item} -> {self.right_item}'
-
-    class Meta:
-        verbose_name = _('Сәйкестендіру жұбы')
-        verbose_name_plural = _('Сәйкестендіру жұптары')

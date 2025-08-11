@@ -107,7 +107,7 @@ def enroll_user_to_subject(request, subject_id):
         UserChapter.objects.get_or_create(user_subject=user_subject, user=user, chapter=chapter)
 
         for lesson in chapter.lessons.all():
-            UserLesson.objects.get_or_create(user_subject=user_subject, lesson=lesson)
+            UserLesson.objects.get_or_create(user_subject=user_subject, user=user, lesson=lesson)
 
     messages.success(request, _('Пән қосылды!'))
     return redirect('student')

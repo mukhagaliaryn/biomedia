@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from core.models import Task, Pair, Question, Option, UserLesson
+from core.models import Task, Pair, Option, UserLesson, Video, Written, TextGap
 
 
 # UserTask model
@@ -19,11 +19,30 @@ class UserTask(models.Model):
     is_completed = models.BooleanField(_('Орындалды'), default=False)
 
     class Meta:
-        verbose_name = _('Тапсырма нәтижесі')
-        verbose_name_plural = _('Тапсырма нәтижелері')
+        verbose_name = _('Қолданушының тапсырмасы')
+        verbose_name_plural = _('Қолданушының тапсырмалары')
 
     def __str__(self):
         return f'{self.user_lesson.user} | {self.task}'
+
+
+# UserVideo model
+# ----------------------------------------------------------------------------------------------------------------------
+class UserVideo(models.Model):
+    user_task = models.ForeignKey(
+        UserTask, on_delete=models.CASCADE,
+        related_name='user_videos', verbose_name=_('Қолданушының тапсырмасы')
+    )
+    video = models.ForeignKey(
+        Video, on_delete=models.CASCADE,
+        related_name='user_videos', verbose_name=_('Видеосабақ')
+    )
+    watched_seconds = models.PositiveIntegerField(_('Қараған уақыт (сек)'), default=0)
+    is_completed = models.BooleanField(_('Аяқталған'), default=False)
+
+    class Meta:
+        verbose_name = _('Қолданушының видеосабағы')
+        verbose_name_plural = _('Қолданушының видеосабақтары')
 
 
 # UserWritten model
@@ -31,13 +50,17 @@ class UserTask(models.Model):
 class UserWritten(models.Model):
     user_task = models.OneToOneField(
         UserTask, on_delete=models.CASCADE,
-        related_name='written_answer', verbose_name=_('Жауап')
+        related_name='user_written', verbose_name=_('Қолданушының тапсырмасы')
     )
-    answer = models.TextField(_('Жазған мәтіні'))
+    written = models.ForeignKey(
+        Written, on_delete=models.CASCADE, null=True,
+        related_name='user_written', verbose_name=_('Жазбаша')
+    )
+    answer = models.TextField(_('Жауабы'))
 
     class Meta:
-        verbose_name = _('Жазбаша жауап')
-        verbose_name_plural = _('Жазбаша жауаптар')
+        verbose_name = _('Қолданушының жазбаша жауабы')
+        verbose_name_plural = _('Қолданушының жазбаша жауаптары')
 
 
 # UserTextGap model
@@ -45,43 +68,33 @@ class UserWritten(models.Model):
 class UserTextGap(models.Model):
     user_task = models.OneToOneField(
         UserTask, on_delete=models.CASCADE,
-        related_name='text_gap_answer', verbose_name=_('Жауап')
+        related_name='user_text_gaps', verbose_name=_('Қолданушының тапсырмасы')
     )
-    answer = models.CharField(_('Жазған жауабы'), max_length=255)
-    is_correct = models.BooleanField(_('Дұрыс па'), default=False)
+    text_gap = models.ForeignKey(
+        TextGap, on_delete=models.CASCADE, null=True,
+        related_name='user_text_gaps', verbose_name=_('Cәйкестендіру')
+    )
+    answer = models.CharField(_('Жауабы'), max_length=255)
+    is_correct = models.BooleanField(_('Дұрыс па?'), default=False)
 
     class Meta:
-        verbose_name = _('Сөйлемді аяқтау жауабы')
-        verbose_name_plural = _('Сөйлемді аяқтау жауаптары')
+        verbose_name = _('Қолданушының сәйкестендіруі')
+        verbose_name_plural = _('Қолданушының сәйкестендірулері')
 
 
 # Test model
 # ----------------------------------------------------------------------------------------------------------------------
-# UserQuestion model
-class UserQuestion(models.Model):
-    user_task = models.ForeignKey(
-        UserTask, on_delete=models.CASCADE,
-        related_name='user_questions', verbose_name=_('Қолданушы тапсырмасы')
-    )
-    question = models.ForeignKey(
-        Question, on_delete=models.CASCADE,
-        related_name='user_questions', verbose_name=_('Сұрақ')
-    )
-    is_correct = models.BooleanField(_('Дұрыс па'), default=False)
-    score = models.PositiveIntegerField(_('Жинаған балл'), default=0)
-
-    class Meta:
-        verbose_name = _('Қолданушы сұрағы')
-        verbose_name_plural = _('Қолданушы сұрақтары')
-
-
 # UserAnswer model
 class UserAnswer(models.Model):
-    user_question = models.ForeignKey(
-        UserQuestion, on_delete=models.CASCADE,
-        related_name='user_answers', verbose_name=_('Қолданушы сұрағы')
+    user_task = models.ForeignKey(
+        UserTask, on_delete=models.CASCADE, null=True,
+        related_name='user_options', verbose_name=_('Қолданушы тапсырмасы')
     )
-    options = models.ManyToManyField(Option, related_name='user_answers', verbose_name=_('Таңдалған нұсқалар'))
+    option = models.ForeignKey(
+        Option, on_delete=models.CASCADE, null=True,
+        related_name='user_options', verbose_name=_('Жауап')
+    )
+    options = models.ManyToManyField(Option, related_name='user_answers', verbose_name=_('Таңдалған жауаптар'))
 
     class Meta:
         verbose_name = _('Таңдалған жауап')

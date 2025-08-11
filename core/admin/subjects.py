@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
-from core.models import Subject, Chapter, Lesson, LessonDocs, Content
+from core.models import Subject, Chapter, Lesson, LessonDocs
 from django_summernote.admin import SummernoteModelAdmin, SummernoteModelAdminMixin
 from core.models.tasks import Task
 
@@ -69,23 +69,6 @@ class LessonDocsTab(admin.TabularInline):
     extra = 0
 
 
-# Content Tab
-class ContentTab(SummernoteModelAdminMixin, admin.TabularInline):
-    model = Content
-    fields = ('order', 'content_type', 'view_link', )
-    extra = 0
-    readonly_fields = ('view_link',)
-
-    # Detail view
-    def view_link(self, obj):
-        if obj.pk:
-            url = reverse('admin:core_content_change', args=[obj.pk])
-            return format_html('<a href="{}" class="view-link">Толығырақ</a>', url)
-        return '-'
-
-    view_link.short_description = _('Контент сілтемесі')
-
-
 # Task Tab
 class TaskTab(SummernoteModelAdminMixin, admin.TabularInline):
     model = Task
@@ -93,7 +76,6 @@ class TaskTab(SummernoteModelAdminMixin, admin.TabularInline):
     extra = 0
     readonly_fields = ('view_link',)
 
-    # Detail view
     def view_link(self, obj):
         if obj.pk:
             url = reverse('admin:core_task_change', args=[obj.pk])
@@ -106,16 +88,17 @@ class TaskTab(SummernoteModelAdminMixin, admin.TabularInline):
 # Lesson admin
 @admin.register(Lesson)
 class LessonAdmin(SummernoteModelAdmin):
-    list_display = ('title', 'chapter', 'order')
+    list_display = ('title', 'chapter', 'order', )
     list_filter = ('subject', 'chapter', )
-    ordering = ('chapter', 'order')
-    inlines = (LessonDocsTab, ContentTab, TaskTab, )
-    readonly_fields = ('subject_link',)
+    ordering = ('chapter', 'order', )
+    inlines = (LessonDocsTab, TaskTab, )
+    readonly_fields = ('subject_link', )
+
 
     def subject_link(self, obj):
         if obj.subject:
             url = reverse('admin:core_subject_change', args=[obj.subject.id])
-            return format_html('<a href="{}" class="view-link">🔗 {} пәніне өту</a>', url, obj.subject.title)
-        return "— пән байланыспаған"
+            return format_html('<a href="{}" class="view-link">🔗 {} пәніне өту</a>', url, obj.subject.name)
+        return '-'
 
     subject_link.short_description = 'Пәнге сілтеме'
