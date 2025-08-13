@@ -2,10 +2,24 @@
 
 
 {% block base_layout %}
-<div class="max-w-screen-2xl w-full mx-auto py-8">
-    <div>
+<div class="max-w-screen-2xl w-full mx-auto grid gap-8 p-8 text-center">
+    <div class="flex justify-center gap-2">
+        {% for ut in user_tasks %}
+            <div class="w-48 h-2 rounded-lg bg-secondary-200"></div>
+        {% endfor %}
     </div>
     
-    <h1>{{ user_task.task.task_type }}</h1>
+    <div class="grid gap-4">
+        <h1 class="text-2xl font-medium">{{ user_task.task.get_task_type_display }}</h1>
+
+        <div>
+            {% for u_video in user_tasks %}
+                <div class="aspect-video rounded-xl bg-foreground">
+                    <iframe src="{{ u_video.video.url }}" frameborder="0" class="w-full h-full"></iframe>
+                </div>
+            {% endfor %}
+        </div>
+
+    </div>
 </div>
 {% endblock base_layout %}
