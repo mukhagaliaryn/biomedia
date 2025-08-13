@@ -13,7 +13,7 @@ class UserSubject(models.Model):
         Subject, on_delete=models.CASCADE,
         verbose_name=_('Пән'), related_name='user_subjects'
     )
-    subject_score = models.PositiveSmallIntegerField(_('Пәннің жалпы бағасы (%)'), default=0)
+    subject_score = models.PositiveSmallIntegerField(_('Пәннің жалпы бағасы'), default=0)
     is_completed = models.BooleanField(_('Орындалды'), default=False)
     created_at = models.DateTimeField(_('Басталған уақыты'), auto_now_add=True)
     completed_at = models.DateTimeField(_('Орындалған уақыты'), blank=True, null=True)
@@ -41,7 +41,7 @@ class UserChapter(models.Model):
         UserSubject, on_delete=models.CASCADE,
         related_name='user_chapters', verbose_name=_('Қолданушының пәндері')
     )
-    chapter_score = models.DecimalField(_('Бөлімнің жалпы бағасы (%)'), max_digits=5, decimal_places=2, default=0)
+    chapter_score = models.PositiveSmallIntegerField(_('Бөлімнің жалпы бағасы'), default=0)
     is_completed = models.BooleanField(_('Орындалды'), default=False)
 
     def __str__(self):
@@ -72,10 +72,11 @@ class UserLesson(models.Model):
         Lesson, on_delete=models.CASCADE,
         related_name='user_lessons', verbose_name=_('Сабақ')
     )
-    lesson_score = models.DecimalField(_('Сабақтың бағасы (%)'), max_digits=5, decimal_places=2, default=0)
+    lesson_score = models.PositiveSmallIntegerField(_('Сабақтың бағасы'), default=0)
     status = models.CharField(_('Status'), choices=LESSON_STATUS, max_length=64, default='no-started')
-    is_completed = models.BooleanField(_('Орындалды'), default=False)
+    started_at = models.DateTimeField(_('Басталған уақыты'), auto_now_add=True)
     completed_at = models.DateTimeField(_('Орындалған уақыты'), blank=True, null=True)
+    is_completed = models.BooleanField(_('Орындалды'), default=False)
 
     class Meta:
         verbose_name = _('Қолданушының сабағы')

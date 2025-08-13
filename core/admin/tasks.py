@@ -38,23 +38,14 @@ class QuestionTab(SummernoteModelAdminMixin, admin.TabularInline):
             return format_html('<a href="{}" class="view-link">Толығырақ</a>', url)
         return '-'
 
-    view_link.short_description = 'Тапсырмаға сілтеме'
+    view_link.short_description = 'Сұраққа сілтеме'
 
 
 # MatchingPair Tab
 class MatchingPairTab(admin.TabularInline):
     model = Pair
-    fields = ('left_item', 'right_item', 'view_link', )
+    fields = ('left_item', 'right_item', )
     extra = 0
-    readonly_fields = ('view_link', )
-
-    def view_link(self, obj):
-        if obj.pk:
-            url = reverse('admin:core_question_change', args=[obj.pk])
-            return format_html('<a href="{}" class="view-link">Толығырақ</a>', url)
-        return '-'
-
-    view_link.short_description = 'Тапсырмаға сілтеме'
 
 
 # Task admin

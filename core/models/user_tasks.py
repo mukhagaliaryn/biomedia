@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from core.models import Task, Pair, Option, UserLesson, Video, Written, TextGap
+from core.models import Task, Pair, Option, UserLesson, Video, Written, TextGap, Question
 
 
 # UserTask model
@@ -48,7 +48,7 @@ class UserVideo(models.Model):
 # UserWritten model
 # ----------------------------------------------------------------------------------------------------------------------
 class UserWritten(models.Model):
-    user_task = models.OneToOneField(
+    user_task = models.ForeignKey(
         UserTask, on_delete=models.CASCADE,
         related_name='user_written', verbose_name=_('Қолданушының тапсырмасы')
     )
@@ -66,15 +66,15 @@ class UserWritten(models.Model):
 # UserTextGap model
 # ----------------------------------------------------------------------------------------------------------------------
 class UserTextGap(models.Model):
-    user_task = models.OneToOneField(
+    user_task = models.ForeignKey(
         UserTask, on_delete=models.CASCADE,
         related_name='user_text_gaps', verbose_name=_('Қолданушының тапсырмасы')
     )
     text_gap = models.ForeignKey(
         TextGap, on_delete=models.CASCADE, null=True,
-        related_name='user_text_gaps', verbose_name=_('Cәйкестендіру')
+        related_name='user_text_gaps', verbose_name=_('Толықтыру')
     )
-    answer = models.CharField(_('Жауабы'), max_length=255)
+    answer = models.CharField(_('Жауабы'), max_length=255, null=True, blank=True)
     is_correct = models.BooleanField(_('Дұрыс па?'), default=False)
 
     class Meta:
@@ -90,8 +90,8 @@ class UserAnswer(models.Model):
         UserTask, on_delete=models.CASCADE, null=True,
         related_name='user_options', verbose_name=_('Қолданушы тапсырмасы')
     )
-    option = models.ForeignKey(
-        Option, on_delete=models.CASCADE, null=True,
+    question = models.ForeignKey(
+        Question, on_delete=models.CASCADE, null=True,
         related_name='user_options', verbose_name=_('Жауап')
     )
     options = models.ManyToManyField(Option, related_name='user_answers', verbose_name=_('Таңдалған жауаптар'))

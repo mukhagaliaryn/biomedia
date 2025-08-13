@@ -80,7 +80,8 @@
         <!-- Lesson action -->
         <div class="flex gap-2 justify-center">
             <a
-                href="#" 
+                href="#"
+                disabled
                 class="flex gap-2 justify-center items-center text-center cursor-pointer focus:outline-none bg-secondary-100 hover:bg-secondary-200 focus:ring-4 focus:ring-secondary-300 font-medium rounded-lg px-5 py-2.5"
             >
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -92,13 +93,26 @@
                 <span>Алдынғы сабақ</span>
             </a>
 
-            <form action="">
-                <button 
-                    class="flex gap-2 justify-center items-center text-center cursor-pointer focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg px-5 py-2.5"
+            {% if user_lesson.status == 'no-started' %}
+                <form action="{% url 'lesson_start' user_subject.pk user_chapter.pk user_lesson.pk %}" method="post">
+                    {% csrf_token %}
+                    <button
+                        type="submit"
+                        class="flex gap-2 justify-center items-center text-center cursor-pointer focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg px-5 py-2.5"
+                    >
+                        Сабақты бастау
+                    </button>
+                </form>
+            {% elif user_lesson.status == 'in-progress' %}
+                <a
+                    href="{% url 'user_lesson_task' user_subject.pk user_chapter.pk user_lesson.pk first_task.id %}"
+                    disabled
+                    class="flex gap-2 justify-center items-center text-center cursor-pointer focus:outline-none bg-secondary-100 hover:bg-secondary-200 focus:ring-4 focus:ring-secondary-300 font-medium rounded-lg px-5 py-2.5"
                 >
-                    Сабақты бастау
-                </button>
-            </form>
+                    <span>Сабаққа кіру</span>
+                </a>
+                
+            {% endif %}
             
             <a
                 href="#" 

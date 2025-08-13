@@ -55,7 +55,7 @@
                                 {% url 'user_lesson' user_subject.id uc.id ul.id as lesson_url %}
                                 <a
                                     href="{{ lesson_url }}"
-                                    class="flex justify-between border border-secondary-200 rounded-lg p-4 {% if request.path == lesson_url %}bg-primary-700 text-white{% else %}bg-white{% endif %}"
+                                    class="flex items-center gap-2 justify-between border border-secondary-200 rounded-lg p-4 {% if request.path == lesson_url %}bg-primary-700 text-white{% else %}bg-white{% endif %}"
                                 >
                                     <div class="flex items-start gap-4">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -73,7 +73,7 @@
 
                                     <div class="relative">
                                         <div 
-                                            class="radial-progress bg-secondary-100 text-xs text-primary-700" 
+                                            class="radial-progress bg-primary-700 text-xs text-white" 
                                             style="--value:86; --size: 2.5rem;" 
                                             aria-valuenow="70" 
                                             role="progressbar"
@@ -84,7 +84,7 @@
                                 </a>
                             {% else %}
                                 <div
-                                    class="flex gap-2 items-center justify-between border border-secondary-200 rounded-lg p-4 {% if request.path == lesson_url %}bg-primary-700 text-white{% else %}bg-white{% endif %}"
+                                    class="flex gap-2 items-center justify-between border border-secondary-200 rounded-lg p-4 bg-white"
                                 >
                                     <div class="flex items-start gap-2">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"

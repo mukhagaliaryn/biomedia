@@ -23,7 +23,6 @@ class LessonTab(SummernoteModelAdminMixin, admin.TabularInline):
     extra = 0
     readonly_fields = ('view_link', )
 
-    # Detail view
     def view_link(self, obj):
         if obj.pk:
             url = reverse('admin:core_lesson_change', args=[obj.pk])

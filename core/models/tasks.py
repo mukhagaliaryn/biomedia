@@ -18,7 +18,7 @@ class Task(models.Model):
         Lesson, on_delete=models.CASCADE,
         related_name='tasks', verbose_name=_('Сабақ')
     )
-    task_type = models.CharField(_('Тапсырма түрі'), choices=TASK_TYPE, default='written', max_length=32)
+    task_type = models.CharField(_('Тапсырма түрі'), choices=TASK_TYPE, default='video', max_length=32)
     task_score = models.PositiveIntegerField(_('Жалпы балл'), default=0)
     order = models.PositiveIntegerField(_('Реттілік нөмері'), default=0)
 

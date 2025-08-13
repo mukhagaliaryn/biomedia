@@ -108,7 +108,7 @@ LOCALE_PATHS = [
     BASE_DIR / 'locales'
 ]
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'kk-kz'
 TIME_ZONE = 'Asia/Almaty'
 USE_I18N = True
 USE_TZ = True
