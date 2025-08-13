@@ -1,0 +1,33 @@
+
+
+<div class="max-w-2xl w-full mx-auto">
+    {% if user_task.is_completed %}
+        {% for uw in user_written %}
+            <div class="flex gap-1 items-center font-medium px-4 py-2 rounded-xl bg-primary-100 text-primary-700">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-circle-check-icon lucide-circle-check">
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="m9 12 2 2 4-4" />
+                </svg>
+                <span>Орындалды</span>
+            </div>
+        {% endfor %}
+    {% else %}
+        <form class="grid gap-4">
+            {% for uw in user_written %}
+                <div class="grid gap-2">
+                    <div class="text-left">{{ uw.written.instruction|safe }}</div>
+                    <textarea name="answer" class="w-full border border-border-200 rounded-xl">{{ uw.answer }}</textarea>
+                </div>
+                <button
+                    type="submit"
+                    class="flex gap-2 justify-center items-center text-center cursor-pointer focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg px-5 py-2.5"
+                >
+                    Видеосабақты аятау
+                </button>
+            {% endfor %}
+        </form>  
+    {% endif %}
+</div>
+

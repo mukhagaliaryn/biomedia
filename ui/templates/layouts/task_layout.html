@@ -1,0 +1,21 @@
+{% extends 'layouts/base_layout.html' %}
+{% load static %}
+
+
+{% block base_layout %}
+<div class="max-w-screen-2xl w-full mx-auto grid gap-8 p-8 text-center">
+    <div class="flex justify-center gap-2">
+        {% for ut in user_tasks %}
+            <a 
+                href="{% url 'user_lesson_task' user_subject.id user_chapter.id user_lesson.id ut.id %}" 
+                class="w-48 h-3 rounded-lg  {% if ut.is_completed %}bg-primary-700{% else %}bg-secondary-200{% endif %}">
+            </a>
+        {% endfor %}
+    </div>
+    
+    <div class="w-full">
+        {% block task_layout %}
+        {% endblock task_layout %}
+    </div>
+</div>
+{% endblock base_layout %}

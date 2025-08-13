@@ -6,6 +6,7 @@ from core.models import UserSubject, UserChapter, UserLesson, UserTask, UserVide
     UserAnswer, UserMatching
 from core.utils.decorators import role_required
 
+
 # User lesson page
 # ----------------------------------------------------------------------------------------------------------------------
 @login_required
@@ -126,7 +127,7 @@ def lesson_start_handler(request, subject_id, chapter_id, lesson_id):
     return redirect('user_lesson', subject_id=subject_id, chapter_id=chapter_id, lesson_id=lesson_id)
 
 
-# User lesson page
+# User lesson task page
 # ----------------------------------------------------------------------------------------------------------------------
 @login_required
 @role_required('student')
@@ -136,16 +137,57 @@ def user_lesson_task_view(request, subject_id, chapter_id, lesson_id, task_id):
     user_chapter = get_object_or_404(UserChapter, user_subject=user_subject, pk=chapter_id)
     user_lesson = get_object_or_404(UserLesson, user_subject=user_subject, pk=lesson_id)
     user_task = get_object_or_404(UserTask, pk=task_id)
-
     user_tasks = UserTask.objects.filter(user_lesson=user_lesson)
+
+    related_data = {}
+
+    task_type = user_task.task.task_type
+
+    if task_type == 'video':
+        related_data['user_videos'] = user_task.user_videos.all()
+
+    elif task_type == 'written':
+        related_data['user_written'] = user_task.user_written.all()
+
+    elif task_type == 'text_gap':
+        related_data['user_text_gaps'] = user_task.user_text_gaps.all()
+
+    elif task_type == 'test':
+        related_data['user_answers'] = user_task.user_options.select_related('question').prefetch_related('options')
+
+    elif task_type == 'matching':
+        related_data['user_matchings'] = user_task.matching_answers.all()
+
+    # POST requests...
+    if request.method == 'POST':
+        if task_type == 'video':
+            videos = user_task.user_videos.all()
+            for uv in videos:
+                watched_seconds = request.POST.get(f'watched_{uv.id}')
+                print('watched_seconds:', watched_seconds)
+                uv.watched_seconds = int(request.POST.get(f'watched_{uv.id}', 0))
+                uv.is_completed = True
+                uv.save()
+
+            if all(uv.is_completed for uv in videos):
+                user_task.is_completed = True
+                user_task.score = user_task.task.task_score
+                user_task.save()
+                messages.success(request, 'Видеосабақ аяқталды!')
+
+            return redirect(
+                'user_lesson_task',
+                subject_id=subject_id, chapter_id=chapter_id, lesson_id=lesson_id, task_id=task_id
+            )
 
     context = {
         'user_subject': user_subject,
         'user_chapter': user_chapter,
         'user_lesson': user_lesson,
         'user_task': user_task,
-
-        'user_tasks': user_tasks
+        'user_tasks': user_tasks,
+        'task_type': task_type,
+        **related_data
     }
 
     return render(request, 'app/dashboard/student/user/subject/chapter/lesson/task/page.html', context)
