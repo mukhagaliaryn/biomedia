@@ -1,9 +1,8 @@
 from django.contrib import messages
-from django.utils import timezone
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from core.models import UserSubject, UserChapter, UserLesson, UserTask, UserVideo, UserWritten, UserTextGap, \
-    UserAnswer, UserMatching
+    UserAnswer, UserMatching, Option
 from core.utils.decorators import role_required
 
 
@@ -175,6 +174,87 @@ def user_lesson_task_view(request, subject_id, chapter_id, lesson_id, task_id):
                 user_task.save()
                 messages.success(request, 'Видеосабақ аяқталды!')
 
+            return redirect(
+                'user_lesson_task',
+                subject_id=subject_id, chapter_id=chapter_id, lesson_id=lesson_id, task_id=task_id
+            )
+
+        elif task_type == 'written':
+            for uw in user_task.user_written.all():
+                answer = request.POST.get(f'answer_{uw.id}', '').strip()
+                if answer:
+                    uw.answer = answer
+                    uw.is_submitted = True
+                    uw.save()
+
+            messages.success(request, 'Барлық жауаптар сәтті жіберілді!')
+            return redirect(
+                'user_lesson_task',
+                subject_id=subject_id, chapter_id=chapter_id, lesson_id=lesson_id, task_id=task_id
+            )
+
+        elif task_type == 'text_gap':
+            is_all_correct = True
+            for user_text_gap in user_task.user_text_gaps.all():
+                user_answer = request.POST.get(f'answer_{user_text_gap.id}', '').strip()
+                correct_answer = user_text_gap.text_gap.correct_answer.strip()
+
+                user_text_gap.answer = user_answer
+                user_text_gap.is_correct = user_answer.lower() == correct_answer.lower()
+                user_text_gap.save()
+
+                if not user_text_gap.is_correct:
+                    is_all_correct = False
+
+            if is_all_correct:
+                user_task.is_completed = True
+                user_task.score = user_task.task.task_score
+                user_task.save()
+                messages.success(request, 'Барлық жауап дұрыс!')
+            else:
+                messages.error(request, 'Кейбір жауаптар дұрыс емес. Қайта тапсырып көріңіз!')
+
+        elif task_type == 'test':
+            total_score = 0
+
+            for user_answer in user_task.user_options.select_related('question').prefetch_related('options'):
+                selected_option_ids = request.POST.getlist(f'question_{user_answer.question.id}')
+                selected_options = Option.objects.filter(id__in=selected_option_ids)
+
+                user_answer.options.set(selected_options)
+                correct_options = user_answer.question.options.filter(is_correct=True)
+
+                if set(selected_options) == set(correct_options):
+                    total_score += sum(opt.score for opt in correct_options)
+
+            user_task.score = total_score
+            user_task.is_completed = True
+            user_task.save()
+
+            messages.success(request, f'Сіз {total_score} балл жинадыңыз!')
+
+            return redirect(
+                'user_lesson_task',
+                subject_id=subject_id, chapter_id=chapter_id, lesson_id=lesson_id, task_id=task_id
+            )
+
+        elif task_type == 'matching':
+            correct = 0
+
+            for um in user_task.matching_answers.select_related('pair'):
+                selected = request.POST.get(f'selected_right_{um.id}', '').strip()
+                um.selected_right = selected
+                um.is_correct = selected == um.pair.right_item
+                um.save()
+
+                if um.is_correct:
+                    correct += 1
+
+            user_task.score = correct
+            user_task.is_completed = True
+            user_task.save()
+
+            messages.success(request, f'Сәйкестендіру тапсырмасы аяқталды. Дұрыс жауаптар: {correct}')
             return redirect(
                 'user_lesson_task',
                 subject_id=subject_id, chapter_id=chapter_id, lesson_id=lesson_id, task_id=task_id

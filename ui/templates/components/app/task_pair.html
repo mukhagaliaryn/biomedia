@@ -1,0 +1,69 @@
+<div class="max-w-2xl w-full mx-auto grid gap-4">
+    {% if user_task.is_completed %}
+        ...
+    {% else %}
+        <form method="post" id="matching-form">
+            {% csrf_token %}
+
+            <div class="grid grid-cols-2 gap-4">
+                <!-- Сол жақтағы элементтер (Drag origin) -->
+                <div>
+                    <h3 class="font-medium mb-2">Сол жақ</h3>
+                    {% for um in user_matchings %}
+                        <div class="p-2 bg-muted rounded mb-2 border cursor-move"
+                            draggable="true"
+                            ondragstart="drag(event)"
+                            id="left-{{ um.id }}"
+                            data-id="{{ um.id }}">
+                            {{ um.pair.left_item }}
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Оң жақтағы бос орындар (Drop targets) -->
+                <div>
+                    <h3 class="font-medium mb-2">Оң жақ</h3>
+                    {% for um in user_matchings %}
+                        <div class="p-2 bg-white border rounded mb-2 min-h-[40px]"
+                            ondrop="drop(event)"
+                            ondragover="allowDrop(event)"
+                            data-id="{{ um.id }}"
+                            id="drop-{{ um.id }}">
+                            {{ um.pair.right_item }}
+                        </div>
+
+                        <input type="hidden" name="selected_right_{{ um.id }}" id="input-{{ um.id }}">
+                    {% endfor %}
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary mt-4">Жіберу</button>
+        </form>
+
+        <script>
+            function allowDrop(ev) {
+                ev.preventDefault();
+            }
+
+            function drag(ev) {
+                ev.dataTransfer.setData("text", ev.target.id);
+            }
+
+            function drop(ev) {
+                ev.preventDefault();
+                const data = ev.dataTransfer.getData("text");
+                const draggedElement = document.getElementById(data);
+                const dropTarget = ev.target;
+
+                if (dropTarget && draggedElement) {
+                    // Көшіреміз
+                    dropTarget.innerHTML = draggedElement.innerHTML;
+
+                    const matchId = dropTarget.getAttribute("data-id");
+                    const input = document.getElementById(`input-${matchId}`);
+                    input.value = draggedElement.innerText.trim();
+                }
+            }
+        </script>
+    {% endif %}
+</div>

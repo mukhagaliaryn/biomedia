@@ -13,21 +13,11 @@
     {% elif task_type == 'written' %}
         {% include 'components/app/task_written.html' %}
     {% elif task_type == 'text_gap' %}
-        {% for tg in user_text_gaps %}
-            {{ tg.text_gap.prompt|safe }}
-            <input type="text" name="answer_{{ tg.id }}" value="{{ tg.answer }}">
-        {% endfor %}
+        {% include 'components/app/task_text_gap.html' %}
     {% elif task_type == 'test' %}
-        {% for answer in user_answers %}
-            Сұрақ: {{ answer.question.text|safe }}
-            {% for opt in answer.question.options.all %}
-                <label><input type="checkbox" name="opt_{{ opt.id }}"> {{ opt.text|safe }}</label>
-            {% endfor %}
-        {% endfor %}
+        {% include 'components/app/task_test.html' %}
     {% elif task_type == 'matching' %}
-        {% for match in user_matchings %}
-            {{ match.pair.left_item }} — {{ match.selected_right }}
-        {% endfor %}
+        {% include 'components/app/task_pair.html' %}
     {% endif %}
 </div>
 {% endblock task_layout %}

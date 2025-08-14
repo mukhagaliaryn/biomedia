@@ -57,6 +57,7 @@ class UserWritten(models.Model):
         related_name='user_written', verbose_name=_('Жазбаша')
     )
     answer = models.TextField(_('Жауабы'))
+    is_submitted = models.BooleanField(_('Жіберілді'), default=False)
 
     class Meta:
         verbose_name = _('Қолданушының жазбаша жауабы')
