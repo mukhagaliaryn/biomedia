@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from core.models import Task, Pair, Option, UserLesson, Video, Written, TextGap, Question
+from core.models import Task, Option, UserLesson, Video, Written, TextGap, Question
 
 
 # UserTask model
@@ -100,22 +100,3 @@ class UserAnswer(models.Model):
     class Meta:
         verbose_name = _('Таңдалған жауап')
         verbose_name_plural = _('Таңдалған жауаптар')
-
-
-# UserMatching model
-# ----------------------------------------------------------------------------------------------------------------------
-class UserMatching(models.Model):
-    user_task = models.ForeignKey(
-        UserTask, on_delete=models.CASCADE,
-        related_name='matching_answers', verbose_name=_('Қолданушы тапсырмасы')
-    )
-    pair = models.ForeignKey(
-        Pair, on_delete=models.CASCADE,
-        verbose_name=_('Сәйкес жұп (дұрыс)')
-    )
-    selected_right = models.CharField(_('Таңдалған оң жақ'), max_length=255)
-    is_correct = models.BooleanField(_('Сәйкес пе?'), default=False)
-
-    class Meta:
-        verbose_name = _('Сәйкестендіру жауабы')
-        verbose_name_plural = _('Сәйкестендіру жауаптары')

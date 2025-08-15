@@ -20,6 +20,7 @@ class Task(models.Model):
     )
     task_type = models.CharField(_('Тапсырма түрі'), choices=TASK_TYPE, default='video', max_length=32)
     task_score = models.PositiveIntegerField(_('Жалпы балл'), default=0)
+    description = models.TextField(_('Анықтамасы'), blank=True, null=True)
     order = models.PositiveIntegerField(_('Реттілік нөмері'), default=0)
 
     def __str__(self):
@@ -131,18 +132,4 @@ class Option(models.Model):
 
 # Task type: Matching model
 # ----------------------------------------------------------------------------------------------------------------------
-# Pair
-class Pair(models.Model):
-    task = models.ForeignKey(
-        Task, on_delete=models.CASCADE, null=True,
-        related_name='matching_pairs', verbose_name=_('Тапсырма')
-    )
-    left_item = models.CharField(_('Сол жақ'), max_length=255)
-    right_item = models.CharField(_('Оң жақ'), max_length=255)
 
-    def __str__(self):
-        return f'{self.left_item} == {self.right_item}'
-
-    class Meta:
-        verbose_name = _('Сәйкестендіру')
-        verbose_name_plural = _('Сәйкестендірулер')

@@ -62,7 +62,7 @@ class Lesson(models.Model):
     order = models.PositiveIntegerField(_('Реттілік нөмері'), default=0)
 
     def __str__(self):
-        return self.title
+        return self.title[:64]
 
     class Meta:
         verbose_name = _('Сабақ')

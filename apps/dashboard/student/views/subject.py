@@ -2,7 +2,7 @@ from django.contrib import messages
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from core.models import UserSubject, UserChapter, UserLesson, UserTask, UserVideo, UserWritten, UserTextGap, \
-    UserAnswer, UserMatching, Option
+    UserAnswer, Option
 from core.utils.decorators import role_required
 
 
@@ -93,15 +93,6 @@ def lesson_start_handler(request, subject_id, chapter_id, lesson_id):
                     question=question
                 )
                 ua.options.set([])
-
-        elif task.task_type == 'matching':
-            for pair in task.matching_pairs.all():
-                UserMatching.objects.get_or_create(
-                    user_task=user_task,
-                    pair=pair,
-                    selected_right='',
-                    is_correct=False
-                )
 
     user_lesson.status = 'in-progress'
     user_lesson.save()
@@ -233,28 +224,6 @@ def user_lesson_task_view(request, subject_id, chapter_id, lesson_id, task_id):
 
             messages.success(request, f'Сіз {total_score} балл жинадыңыз!')
 
-            return redirect(
-                'user_lesson_task',
-                subject_id=subject_id, chapter_id=chapter_id, lesson_id=lesson_id, task_id=task_id
-            )
-
-        elif task_type == 'matching':
-            correct = 0
-
-            for um in user_task.matching_answers.select_related('pair'):
-                selected = request.POST.get(f'selected_right_{um.id}', '').strip()
-                um.selected_right = selected
-                um.is_correct = selected == um.pair.right_item
-                um.save()
-
-                if um.is_correct:
-                    correct += 1
-
-            user_task.score = correct
-            user_task.is_completed = True
-            user_task.save()
-
-            messages.success(request, f'Сәйкестендіру тапсырмасы аяқталды. Дұрыс жауаптар: {correct}')
             return redirect(
                 'user_lesson_task',
                 subject_id=subject_id, chapter_id=chapter_id, lesson_id=lesson_id, task_id=task_id

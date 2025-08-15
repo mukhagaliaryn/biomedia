@@ -45,8 +45,9 @@ class LessonTab(SummernoteModelAdminMixin, admin.TabularInline):
 # Subject admin
 @admin.register(Subject)
 class SubjectAdmin(SummernoteModelAdmin):
-    list_display = ('name', 'created_at', 'last_update', 'view', )
-    search_fields = ('name', 'description')
+    list_display = ('name', 'owner', 'created_at', 'last_update', 'view', )
+    search_fields = ('name', 'description', )
+    list_filter = ('owner', )
     inlines = (ChapterTab, LessonTab, )
 
 
@@ -54,9 +55,10 @@ class SubjectAdmin(SummernoteModelAdmin):
 # ----------------------------------------------------------------------------------------------------------------------
 @admin.register(Chapter)
 class ChapterAdmin(SummernoteModelAdmin):
-    list_display = ('name', 'subject', 'order')
-    list_filter = ('subject',)
-    ordering = ('order',)
+    list_display = ('name', 'subject', 'order', )
+    search_fields = ('name', 'subject', )
+    list_filter = ('subject', )
+    ordering = ('order', )
     inlines = (LessonTab, )
 
 
@@ -87,9 +89,10 @@ class TaskTab(SummernoteModelAdminMixin, admin.TabularInline):
 # Lesson admin
 @admin.register(Lesson)
 class LessonAdmin(SummernoteModelAdmin):
-    list_display = ('title', 'chapter', 'order', )
+    list_display = ('title', 'subject', 'chapter', 'order', )
+    search_fields = ('title', 'subject', 'chapter', 'description', )
     list_filter = ('subject', 'chapter', )
-    ordering = ('chapter', 'order', )
+    ordering = ('order', )
     inlines = (LessonDocsTab, TaskTab, )
     readonly_fields = ('subject_link', )
 

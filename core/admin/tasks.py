@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.urls import reverse
 from django.utils.html import format_html
 from django_summernote.admin import SummernoteModelAdmin, SummernoteModelAdminMixin
-from core.models import Task, Question, Option, Written, Pair, TextGap, Video
+from core.models import Task, Question, Option, Written, TextGap, Video
 
 
 # Task admin
@@ -41,19 +41,12 @@ class QuestionTab(SummernoteModelAdminMixin, admin.TabularInline):
     view_link.short_description = 'Сұраққа сілтеме'
 
 
-# MatchingPair Tab
-class MatchingPairTab(admin.TabularInline):
-    model = Pair
-    fields = ('left_item', 'right_item', )
-    extra = 0
-
-
 # Task admin
 @admin.register(Task)
 class TaskAdmin(SummernoteModelAdmin):
     list_display = ('lesson', 'task_score', 'order', )
     readonly_fields = ('lesson_link', )
-    inlines = (VideoTab, WrittenTab, TextGapTab, QuestionTab, MatchingPairTab, )
+    inlines = (VideoTab, WrittenTab, TextGapTab, QuestionTab, )
 
     def lesson_link(self, obj):
         if obj.lesson:
