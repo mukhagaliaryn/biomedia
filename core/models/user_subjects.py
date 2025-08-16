@@ -73,7 +73,7 @@ class UserLesson(models.Model):
         related_name='user_lessons', verbose_name=_('Сабақ')
     )
     lesson_score = models.PositiveSmallIntegerField(_('Сабақтың бағасы'), default=0)
-    status = models.CharField(_('Status'), choices=LESSON_STATUS, max_length=64, default='no-started')
+    status = models.CharField(_('Статус'), choices=LESSON_STATUS, max_length=64, default='no-started')
     started_at = models.DateTimeField(_('Басталған уақыты'), auto_now_add=True)
     completed_at = models.DateTimeField(_('Орындалған уақыты'), blank=True, null=True)
     is_completed = models.BooleanField(_('Орындалды'), default=False)

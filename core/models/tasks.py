@@ -107,8 +107,8 @@ class Question(models.Model):
         return f'Тест: {self.pk} - сұрақ'
 
     class Meta:
-        verbose_name = _('Сұрақ')
-        verbose_name_plural = _('Сұрақтар')
+        verbose_name = _('Тест сұрағы')
+        verbose_name_plural = _('Тест сұрақтары')
         ordering = ('order', )
 
 

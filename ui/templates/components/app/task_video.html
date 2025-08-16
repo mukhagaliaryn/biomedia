@@ -1,4 +1,4 @@
-{% load video_filters %}
+{% load filters %}
 
 
 <div class="max-w-2xl w-full mx-auto">
@@ -22,7 +22,7 @@
                 </div>
             </div>
             <div class="aspect-video bg-foreground rounded-xl overflow-hidden">
-                <iframe src="{{ uv.video.url|youtube_embed }}" frameborder="0" class="w-full h-full"></iframe>
+                <iframe src="{{ uv.video.url|video_embed }}" frameborder="0" class="w-full h-full"></iframe>
             </div>
 
             <input type="hidden" class="watched-seconds" name="watched_{{ uv.id }}" value="0">
@@ -50,7 +50,11 @@
 
         {% for uv in user_videos %}
             <div class="aspect-video bg-foreground rounded-xl overflow-hidden">
-                <iframe src="{{ uv.video.url|youtube_embed }}" frameborder="0" class="w-full h-full"></iframe>
+                <iframe 
+                    src="{{ uv.video.url|video_embed }}" 
+                    frameborder="0" 
+                    allowfullscreen
+                    class="w-full h-full"></iframe>
             </div>
 
             <input type="hidden" class="watched-seconds" name="watched_{{ uv.id }}" value="0">
