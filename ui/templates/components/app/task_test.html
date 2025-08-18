@@ -26,9 +26,9 @@
             <div class="grid gap-8 text-left">
                 {% for ua in user_answers %}
                     <div class="grid gap-4 border-b border-border-200 pb-4">
-                        <div class="flex gap-2 items-center font-medium mb-2">
+                        <div class="flex gap-2 font-medium mb-2">
                             <span class="text-xl">{{ forloop.counter }}.</span>
-                            <p>{{ ua.question.text|safe }}</p>
+                            <div>{{ ua.question.text|safe }}</div>
                         </div>
 
                         {% comment "Қолданушы таңдаған опциялар" %}
@@ -71,9 +71,9 @@
 
             {% for ua in user_answers %}
                 <div class="grid gap-4">
-                    <div class="flex items-center gap-2">
+                    <div class="flex gap-2">
                         <span class="font-medium text-xl">{{ ua.question.order }}.</span>
-                        <p class="font-medium mb-2">{{ ua.question.text|safe }}</p>
+                        <div class="font-medium mb-2">{{ ua.question.text|safe }}</div>
                     </div>
 
                     <div class="grid gap-2">

@@ -79,31 +79,38 @@
 
                         <button 
                             type="button"
-                            class="flex gap-2 justify-center items-center text-center cursor-pointer focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg px-5 py-2.5"    
+                            id="check-btn-{{ tg.id }}"
+                            class="flex gap-2 justify-center items-center text-center cursor-pointer focus:outline-none text-white bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg px-5 py-2.5"    
                             onclick="checkAnswer({{ tg.id }})"
                         >
                             Тексеру
                         </button>
                     </div>
                     <span id="result-{{ tg.id }}" class="text-sm font-medium ml-2"></span>
-                    
-                    <script>
-                        function checkAnswer(id) {
-                            const userInput = document.getElementById(`answer-input-${id}`).value.trim().toLowerCase();
-                            const correctAnswer = document.getElementById(`correct-answer-${id}`).value.trim().toLowerCase();
-                            const result = document.getElementById(`result-${id}`);
-
-                            if (userInput === correctAnswer) {
-                                result.textContent = "✅ Дұрыс!";
-                                result.style.color = "green";
-                            } else {
-                                result.textContent = "❌ Қате!";
-                                result.style.color = "red";
-                            }
-                        }
-                    </script>
                 </div>
             {% endfor %}
+
+            <script>
+                function checkAnswer(id) {
+                    const userInput = document.getElementById(`answer-input-${id}`);
+                    const correctAnswer = document.getElementById(`correct-answer-${id}`).value.trim().toLowerCase();
+                    const result = document.getElementById(`result-${id}`);
+                    const button = document.getElementById(`check-btn-${id}`);
+
+                    if (userInput.value.trim().toLowerCase() === correctAnswer) {
+                        result.textContent = "✅ Дұрыс!";
+                        result.style.color = "green";
+                    } else {
+                        result.textContent = "❌ Қате!";
+                        result.style.color = "red";
+                    }
+
+                    // Бір тексергеннен кейін disable
+                    userInput.readOnly = true; 
+                    button.disabled = true;
+                    button.classList.add("opacity-50", "cursor-not-allowed");
+                }
+            </script>
             
             <div class="flex justify-center">
                 <button

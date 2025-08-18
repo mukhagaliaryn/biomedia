@@ -39,7 +39,7 @@ class Video(models.Model):
         Task, on_delete=models.CASCADE, null=True,
         verbose_name=_('Контент'), related_name='videos'
     )
-    url = models.URLField(_('URL сілтеме'))
+    url = models.CharField(_('URL сілтеме'), max_length=255)
     duration = models.PositiveSmallIntegerField(_('Видео уақыт'), default=0)
     order = models.PositiveIntegerField(_('Реттілік нөмері'), default=0)
 

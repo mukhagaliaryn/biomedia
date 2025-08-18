@@ -1,6 +1,9 @@
+from django.utils import timezone
 from django.contrib import messages
+from django.db.models import Sum
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 from core.models import UserSubject, UserChapter, UserLesson, UserTask, UserVideo, UserWritten, UserTextGap, \
     UserAnswer, Option
 from core.utils.decorators import role_required
@@ -32,13 +35,30 @@ def user_lesson_view(request, subject_id, chapter_id, lesson_id):
         .first()
     )
 
+    # ------------------ Алдыңғы және келесі сабақ ------------------
+    previous_lesson = None
+    next_lesson = None
+
+    lesson_list = list(user_lessons_qs)
+    try:
+        current_index = lesson_list.index(user_lesson)
+        if current_index > 0:
+            previous_lesson = lesson_list[current_index - 1]
+        if current_index < len(lesson_list) - 1:
+            next_lesson = lesson_list[current_index + 1]
+    except ValueError:
+        pass
+    # ---------------------------------------------------------------
+
     context = {
         'user_subject': user_subject,
         'user_chapter': user_chapter,
         'user_lesson': user_lesson,
         'user_chapters': user_chapters,
         'user_lessons_by_chapter': user_lessons_by_chapter,
-        'first_task': first_task
+        'first_task': first_task,
+        'previous_lesson': previous_lesson,
+        'next_lesson': next_lesson,
     }
 
     return render(request, 'app/dashboard/student/user/subject/chapter/lesson/page.html', context)
@@ -127,7 +147,22 @@ def user_lesson_task_view(request, subject_id, chapter_id, lesson_id, task_id):
     user_chapter = get_object_or_404(UserChapter, user_subject=user_subject, pk=chapter_id)
     user_lesson = get_object_or_404(UserLesson, user_subject=user_subject, pk=lesson_id)
     user_task = get_object_or_404(UserTask, pk=task_id)
-    user_tasks = UserTask.objects.filter(user_lesson=user_lesson)
+    user_tasks = UserTask.objects.filter(user_lesson=user_lesson).order_by('task__order')
+
+    # ---------------------- Келесі және алдыңғы тапсырма ----------------------
+    next_user_task = None
+    prev_user_task = None
+
+    task_list = list(user_tasks)
+    try:
+        current_index = task_list.index(user_task)
+        if current_index > 0:
+            prev_user_task = task_list[current_index - 1]
+        if current_index < len(task_list) - 1:
+            next_user_task = task_list[current_index + 1]
+    except ValueError:
+        pass
+    # -------------------------------------------------------------------------
 
     related_data = {}
 
@@ -147,6 +182,8 @@ def user_lesson_task_view(request, subject_id, chapter_id, lesson_id, task_id):
 
     elif task_type == 'matching':
         related_data['user_matchings'] = user_task.matching_answers.all()
+
+    all_tasks_completed = not user_tasks.exclude(is_completed=True).exists()
 
     # POST requests...
     if request.method == 'POST':
@@ -173,8 +210,12 @@ def user_lesson_task_view(request, subject_id, chapter_id, lesson_id, task_id):
         elif task_type == 'written':
             for uw in user_task.user_written.all():
                 answer = request.POST.get(f'answer_{uw.id}', '').strip()
-                if answer:
-                    uw.answer = answer
+                uploaded_file = request.FILES.get(f'file_{uw.id}')
+                if answer or uploaded_file:
+                    if answer:
+                        uw.answer = answer
+                    if uploaded_file:
+                        uw.file = uploaded_file
                     uw.is_submitted = True
                     uw.save()
 
@@ -207,22 +248,37 @@ def user_lesson_task_view(request, subject_id, chapter_id, lesson_id, task_id):
 
         elif task_type == 'test':
             total_score = 0
+            any_answered = False
 
-            for user_answer in user_task.user_options.select_related('question').prefetch_related('options'):
-                selected_option_ids = request.POST.getlist(f'question_{user_answer.question.id}')
+            for user_answer in user_task.user_options.select_related('question').prefetch_related('question__options'):
+                question = user_answer.question
+                selected_option_ids = request.POST.getlist(f'question_{question.id}')
+
+                if selected_option_ids:
+                    any_answered = True
+
+                valid_option_ids = set(question.options.values_list('id', flat=True))
+                selected_option_ids = [int(opt_id) for opt_id in selected_option_ids if int(opt_id) in valid_option_ids]
+
                 selected_options = Option.objects.filter(id__in=selected_option_ids)
-
                 user_answer.options.set(selected_options)
-                correct_options = user_answer.question.options.filter(is_correct=True)
 
-                if set(selected_options) == set(correct_options):
-                    total_score += sum(opt.score for opt in correct_options)
+                correct_option_ids = set(
+                    question.options.filter(is_correct=True).values_list('id', flat=True)
+                )
 
-            user_task.score = total_score
-            user_task.is_completed = True
-            user_task.save()
+                if set(selected_option_ids) == correct_option_ids:
+                    total_score += sum(
+                        question.options.filter(id__in=correct_option_ids).values_list('score', flat=True)
+                    )
 
-            messages.success(request, f'Сіз {total_score} балл жинадыңыз!')
+            if any_answered:
+                user_task.score = total_score
+                user_task.is_completed = True
+                user_task.save()
+                messages.success(request, f'Сіз {total_score} балл жинадыңыз!')
+            else:
+                messages.error(request, 'Сіз ешбір сұраққа жауап бермедіңіз')
 
             return redirect(
                 'user_lesson_task',
@@ -236,7 +292,38 @@ def user_lesson_task_view(request, subject_id, chapter_id, lesson_id, task_id):
         'user_task': user_task,
         'user_tasks': user_tasks,
         'task_type': task_type,
+        'all_tasks_completed': all_tasks_completed,
+        'next_user_task': next_user_task,
+        'prev_user_task': prev_user_task,
         **related_data
     }
 
     return render(request, 'app/dashboard/student/user/subject/chapter/lesson/task/page.html', context)
+
+
+
+@login_required
+@role_required('student')
+@require_POST
+def lesson_finish_handler(request, subject_id, chapter_id, lesson_id):
+    user = request.user
+    user_subject = get_object_or_404(UserSubject, user=user, pk=subject_id)
+    user_chapter = get_object_or_404(UserChapter, user_subject=user_subject, pk=chapter_id)
+    user_lesson = get_object_or_404(UserLesson, user_subject=user_subject, pk=lesson_id)
+
+    user_tasks = UserTask.objects.filter(user_lesson=user_lesson)
+
+    if not user_lesson.is_completed:
+        total_score = user_tasks.aggregate(total=Sum('score')).get('total', 0)
+        print(total_score)
+        user_lesson.lesson_score = total_score
+        user_lesson.status = 'finished'
+        user_lesson.completed_at = timezone.now()
+        user_lesson.is_completed = True
+        user_lesson.save()
+        messages.success(request, "Сабақ сәтті аяқталды!")
+
+    return redirect(
+        'user_lesson',
+        subject_id=subject_id, chapter_id=chapter_id, lesson_id=lesson_id,
+    )

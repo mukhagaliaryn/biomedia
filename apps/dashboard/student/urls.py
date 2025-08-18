@@ -18,4 +18,9 @@ urlpatterns = [
         subject.user_lesson_task_view,
         name='user_lesson_task'
     ),
+    path(
+        'user/subject/<subject_id>/chapter/<chapter_id>/lesson/<lesson_id>/finish/',
+        subject.lesson_finish_handler,
+        name='lesson_finish_handler'
+    ),
 ]

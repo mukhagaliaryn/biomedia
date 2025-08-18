@@ -1,5 +1,3 @@
-
-
 <div class="max-w-2xl w-full mx-auto">
     {% if user_task.is_completed %}
         <div class="grid gap-4">
@@ -29,10 +27,10 @@
             {% endfor %}
         </div>
     {% else %}
-        <form class="grid gap-4" method="post">
+        <form class="grid gap-4" method="post" enctype="multipart/form-data">
             {% csrf_token %}
             {% for uw in user_written %}
-                <div class="grid gap-2">
+                <div class="grid gap-4">
                     <div class="text-left">{{ uw.written.instruction|safe }}</div>
                     {% if uw.is_submitted %}
                         <div class="grid gap-2 text-primary-700">
@@ -49,7 +47,26 @@
                             <span>Оқытушының бағалауын күту</span>
                         </div>
                     {% else %}
-                        <textarea name="answer_{{ uw.id }}" class="w-full border border-border-200 rounded-xl">{{ uw.answer }}</textarea>
+                        <div class="text-left">
+                            <label class="font-medium">Жауабы</label>
+                            <textarea name="answer_{{ uw.id }}" class="w-full border border-border-200 rounded-xl" required>{{ uw.answer }}</textarea>
+                        </div>
+
+                        <div class="text-left">
+                            <label class="font-medium">Файл (қалауыңызша):</label>
+                            <input 
+                                type="file" 
+                                name="file_{{ uw.id }}" 
+                                class="block w-full text-sm border border-border-200 rounded-xl p-2"
+                                accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg,.zip,.rar,.7z,.ppt,.pptx"
+                            />
+
+                            {% if uw.file %}
+                                <span class="text-xs text-muted-foreground">
+                                    Бұрын жүктелген: <a href="{{ uw.file.url }}" class="underline" target="_blank" rel="noopener">файлды ашу</a>
+                                </span>
+                            {% endif %}
+                        </div>
                     {% endif %}
 
                 </div>

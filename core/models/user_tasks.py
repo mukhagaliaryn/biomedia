@@ -56,6 +56,7 @@ class UserWritten(models.Model):
         Written, on_delete=models.CASCADE, null=True,
         related_name='user_written', verbose_name=_('Жазбаша')
     )
+    file = models.FileField(_('Файл'), upload_to='core/models/user_written/files/', null=True, blank=True)
     answer = models.TextField(_('Жауабы'))
     is_submitted = models.BooleanField(_('Жіберілді'), default=False)
 

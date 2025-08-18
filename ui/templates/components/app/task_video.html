@@ -1,7 +1,7 @@
 {% load filters %}
 
 
-<div class="max-w-2xl w-full mx-auto">
+<div class="max-w-screen-lg w-full mx-auto">
 {% if user_task.is_completed %}
     <div class="grid gap-4">
         {% for uv in user_videos %}
@@ -33,7 +33,7 @@
         {% csrf_token %}
         
         <div class="flex justify-between items-center">
-            <div class="flex gap-2 bg-primary-100 text-primary-700 py-2 px-4 rounded-xl">
+            <div class="flex gap-2 bg-secondary-100 text-secondary-700 py-2 px-4 rounded-xl">
                 <span>Қаралған уақыт: </span>
                 <span>
                     <span id="watched-timer">0</span> секунд
@@ -51,12 +51,13 @@
         {% for uv in user_videos %}
             <div class="aspect-video bg-foreground rounded-xl overflow-hidden">
                 <iframe 
-                    src="{{ uv.video.url|video_embed }}" 
-                    frameborder="0" 
+                    src="{{ uv.video.url|video_embed }}"
+                    frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowfullscreen
                     class="w-full h-full"></iframe>
+                {{ uv.video.url|safe }}
             </div>
-
             <input type="hidden" class="watched-seconds" name="watched_{{ uv.id }}" value="0">
         {% endfor %}
         
