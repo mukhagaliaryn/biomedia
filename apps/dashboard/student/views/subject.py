@@ -5,11 +5,11 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from core.models import UserSubject, UserChapter, UserLesson, UserTask, UserVideo, UserWritten, UserTextGap, \
-    UserAnswer, Option
+    UserAnswer, Option, Task
 from core.utils.decorators import role_required
 
 
-# User lesson page
+# user_lesson page
 # ----------------------------------------------------------------------------------------------------------------------
 @login_required
 @role_required('student')
@@ -18,15 +18,10 @@ def user_lesson_view(request, subject_id, chapter_id, lesson_id):
     user_subject = get_object_or_404(UserSubject, user=user, pk=subject_id)
     user_chapter = get_object_or_404(UserChapter, user_subject=user_subject, pk=chapter_id)
     user_lesson = get_object_or_404(UserLesson, user_subject=user_subject, pk=lesson_id)
-
+    tasks = user_lesson.lesson.tasks.exclude(task_type='video')
     user_lessons_qs = UserLesson.objects.filter(user_subject=user_subject).order_by('lesson__order')
-    user_chapters = UserChapter.objects.filter(user_subject=user_subject).order_by('chapter__order')
 
-    user_lessons_by_chapter = {}
-    for ul in user_lessons_qs:
-        chapter_id = ul.lesson.chapter_id
-        user_lessons_by_chapter.setdefault(chapter_id, []).append(ul)
-
+    # ------------------ link for user tasks ------------------
     first_task = (
         UserTask.objects
         .filter(user_lesson=user_lesson)
@@ -35,7 +30,7 @@ def user_lesson_view(request, subject_id, chapter_id, lesson_id):
         .first()
     )
 
-    # ------------------ Алдыңғы және келесі сабақ ------------------
+    # ------------------ prev, next links ------------------
     previous_lesson = None
     next_lesson = None
 
@@ -48,22 +43,34 @@ def user_lesson_view(request, subject_id, chapter_id, lesson_id):
             next_lesson = lesson_list[current_index + 1]
     except ValueError:
         pass
-    # ---------------------------------------------------------------
+
+    # ------------------ for navbar ------------------
+    user_chapters = UserChapter.objects.filter(user_subject=user_subject).order_by('chapter__order')
+    user_lessons_by_chapter = {}
+    for ul in user_lessons_qs:
+        chapter_id = ul.lesson.chapter_id
+        lesson_tasks = ul.lesson.tasks.all()
+        total_duration = sum(task.duration for task in lesson_tasks)
+        ul.total_duration = total_duration
+        user_lessons_by_chapter.setdefault(chapter_id, []).append(ul)
 
     context = {
         'user_subject': user_subject,
         'user_chapter': user_chapter,
         'user_lesson': user_lesson,
-        'user_chapters': user_chapters,
-        'user_lessons_by_chapter': user_lessons_by_chapter,
+        'tasks': tasks,
         'first_task': first_task,
         'previous_lesson': previous_lesson,
         'next_lesson': next_lesson,
+        'total_duration': sum(task.duration for task in user_lesson.lesson.tasks.all()),
+        'user_chapters': user_chapters,
+        'user_lessons_by_chapter': user_lessons_by_chapter,
     }
 
     return render(request, 'app/dashboard/student/user/subject/chapter/lesson/page.html', context)
 
 
+# actions
 @login_required
 @role_required('student')
 def lesson_start_handler(request, subject_id, chapter_id, lesson_id):
@@ -137,7 +144,7 @@ def lesson_start_handler(request, subject_id, chapter_id, lesson_id):
     return redirect('user_lesson', subject_id=subject_id, chapter_id=chapter_id, lesson_id=lesson_id)
 
 
-# User lesson task page
+# user_lesson_task page
 # ----------------------------------------------------------------------------------------------------------------------
 @login_required
 @role_required('student')
@@ -149,7 +156,7 @@ def user_lesson_task_view(request, subject_id, chapter_id, lesson_id, task_id):
     user_task = get_object_or_404(UserTask, pk=task_id)
     user_tasks = UserTask.objects.filter(user_lesson=user_lesson).order_by('task__order')
 
-    # ---------------------- Келесі және алдыңғы тапсырма ----------------------
+    # ---------------------- prev, next links ----------------------
     next_user_task = None
     prev_user_task = None
 
@@ -162,7 +169,6 @@ def user_lesson_task_view(request, subject_id, chapter_id, lesson_id, task_id):
             next_user_task = task_list[current_index + 1]
     except ValueError:
         pass
-    # -------------------------------------------------------------------------
 
     related_data = {}
 
@@ -187,18 +193,17 @@ def user_lesson_task_view(request, subject_id, chapter_id, lesson_id, task_id):
 
     # POST requests...
     if request.method == 'POST':
+        # -------------- video --------------
         if task_type == 'video':
             videos = user_task.user_videos.all()
             for uv in videos:
-                watched_seconds = request.POST.get(f'watched_{uv.id}')
-                print('watched_seconds:', watched_seconds)
                 uv.watched_seconds = int(request.POST.get(f'watched_{uv.id}', 0))
                 uv.is_completed = True
                 uv.save()
 
             if all(uv.is_completed for uv in videos):
                 user_task.is_completed = True
-                user_task.score = user_task.task.task_score
+                user_task.rating = user_task.task.rating
                 user_task.save()
                 messages.success(request, 'Видеосабақ аяқталды!')
 
@@ -207,6 +212,7 @@ def user_lesson_task_view(request, subject_id, chapter_id, lesson_id, task_id):
                 subject_id=subject_id, chapter_id=chapter_id, lesson_id=lesson_id, task_id=task_id
             )
 
+        # -------------- written --------------
         elif task_type == 'written':
             for uw in user_task.user_written.all():
                 answer = request.POST.get(f'answer_{uw.id}', '').strip()
@@ -225,27 +231,58 @@ def user_lesson_task_view(request, subject_id, chapter_id, lesson_id, task_id):
                 subject_id=subject_id, chapter_id=chapter_id, lesson_id=lesson_id, task_id=task_id
             )
 
+        # -------------- text_gap --------------
         elif task_type == 'text_gap':
-            is_all_correct = True
+            total = user_task.user_text_gaps.count()
+            correct = 0
+
             for user_text_gap in user_task.user_text_gaps.all():
                 user_answer = request.POST.get(f'answer_{user_text_gap.id}', '').strip()
                 correct_answer = user_text_gap.text_gap.correct_answer.strip()
 
+                is_correct = user_answer.lower() == correct_answer.lower()
+
                 user_text_gap.answer = user_answer
-                user_text_gap.is_correct = user_answer.lower() == correct_answer.lower()
+                user_text_gap.is_correct = is_correct
                 user_text_gap.save()
 
-                if not user_text_gap.is_correct:
-                    is_all_correct = False
+                if is_correct:
+                    correct += 1
 
-            if is_all_correct:
-                user_task.is_completed = True
-                user_task.score = user_task.task.task_score
-                user_task.save()
+            incorrect = total - correct
+            full_rating = user_task.task.rating
+
+            if correct == total:
+                user_task.rating = full_rating
                 messages.success(request, 'Барлық жауап дұрыс!')
+            elif incorrect == 1:
+                if full_rating == 1:
+                    user_task.rating = 0
+                    messages.warning(request,
+                                     'Бір қате жібердіңіз. Бұл тапсырма тек 1 баллдық болғандықтан, ұпай берілмейді.')
+                else:
+                    user_task.rating = int(full_rating / 2)
+                    messages.info(request, 'Бір қате бар. Жарты ұпай алдыңыз.')
+            elif incorrect >= (total / 2):
+                user_task.rating = 0
+                messages.error(request, 'Қателер жартысынан көп. Ұпай берілмейді.')
             else:
-                messages.error(request, 'Кейбір жауаптар дұрыс емес. Қайта тапсырып көріңіз!')
+                if full_rating == 1:
+                    user_task.rating = 0
+                    messages.warning(request,
+                                     'Кем дегенде бір дұрыс бар, бірақ тапсырма 1 баллдық болғандықтан ұпай берілмейді.')
+                else:
+                    user_task.rating = int(full_rating / 2)
+                    messages.warning(request, 'Бірнеше қате бар. Жарты ұпай алдыңыз.')
 
+            user_task.is_completed = True
+            user_task.save()
+            return redirect(
+                'user_lesson_task',
+                subject_id=subject_id, chapter_id=chapter_id, lesson_id=lesson_id, task_id=task_id
+            )
+
+        # -------------- test --------------
         elif task_type == 'test':
             total_score = 0
             any_answered = False
@@ -273,7 +310,7 @@ def user_lesson_task_view(request, subject_id, chapter_id, lesson_id, task_id):
                     )
 
             if any_answered:
-                user_task.score = total_score
+                user_task.rating = total_score
                 user_task.is_completed = True
                 user_task.save()
                 messages.success(request, f'Сіз {total_score} балл жинадыңыз!')
@@ -314,9 +351,9 @@ def lesson_finish_handler(request, subject_id, chapter_id, lesson_id):
     user_tasks = UserTask.objects.filter(user_lesson=user_lesson)
 
     if not user_lesson.is_completed:
-        total_score = user_tasks.aggregate(total=Sum('score')).get('total', 0)
+        total_score = user_tasks.aggregate(total=Sum('rating')).get('total', 0)
         print(total_score)
-        user_lesson.lesson_score = total_score
+        user_lesson.rating = total_score
         user_lesson.status = 'finished'
         user_lesson.completed_at = timezone.now()
         user_lesson.is_completed = True

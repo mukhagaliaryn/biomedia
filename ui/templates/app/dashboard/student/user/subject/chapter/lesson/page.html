@@ -73,7 +73,7 @@
                         <path d="M12 6v6l4 2" />
                         <circle cx="12" cy="12" r="10" />
                     </svg>
-                    <span>{{ user_lesson.lesson.duration }}:00 мин</span>
+                    <span>{{ total_duration }}:00 мин</span>
                 </div>
             </div>
         </div>
@@ -97,15 +97,7 @@
             {% endif %}
 
             {% if user_lesson.status == 'no-started' %}
-                <form action="{% url 'lesson_start' user_subject.pk user_chapter.pk user_lesson.pk %}" method="post">
-                    {% csrf_token %}
-                    <button
-                        type="submit"
-                        class="flex gap-2 justify-center items-center text-center cursor-pointer focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg px-5 py-2.5"
-                    >
-                        Сабақты бастау
-                    </button>
-                </form>
+                {% include 'components/app/user/lesson/lesson_start_modal.html' %}
             {% elif user_lesson.status == 'in-progress' %}
                 <a
                     href="{% url 'user_lesson_task' user_subject.pk user_chapter.pk user_lesson.pk first_task.id %}"
@@ -145,7 +137,7 @@
             {% endif %}
         </div>
 
-        <!-- Subject tab -->
+        <!-- Lesson tab -->
         <div class="relative">
             <!-- Tab trigger -->
             <div class="mb-4 border-b border-border-200">
@@ -156,7 +148,21 @@
                     role="tablist"
                     data-tabs-inactive-classes="text-muted border-transparent hover:border-b-border-200"
                     data-tabs-active-classes="text-primary-700 hover:text-primary-800 border-primary-700"
-                >
+                >  
+                    {% if user_lesson.is_completed %}
+                        <li class="me-2" role="presentation">
+                            <button 
+                                class="inline-block p-4 border-b-2 rounded-t-lg" 
+                                id="statistics-tab" 
+                                data-tabs-target="#statistics"
+                                type="button" role="tab" 
+                                aria-controls="statistics" 
+                                aria-selected="false"
+                            >
+                                Статистика
+                            </button>
+                        </li>
+                    {% endif %}
                     <li class="me-2" role="presentation">
                         <button 
                             class="inline-block p-4 border-b-2 rounded-t-lg" 
@@ -166,7 +172,7 @@
                             aria-controls="plan" 
                             aria-selected="false"
                         >
-                            Жоспар
+                            Сабақ жоспары
                         </button>
                     </li>
                     <li class="me-2" role="presentation">
@@ -198,6 +204,45 @@
 
             <!-- Tab content -->
             <div id="default-tab-content">
+                <!-- Statistics -->
+                <div 
+                    class="hidden" 
+                    id="statistics" 
+                    role="tabpanel"
+                    aria-labelledby="statistics-tab"
+                >
+                    <div class="flex items-start justify-center gap-8 p-4 text-left">
+                        <div 
+                            class="radial-progress bg-secondary-100 text-xl font-medium text-primary-700" 
+                            style="--value:84; --size: 7rem;" 
+                            aria-valuenow="84" role="progressbar"
+                        >
+                            84%
+                        </div>
+
+                        <div class="grid gap-2">
+                            <h1 class="font-semibold text-xl">Жалпы қорытындысы</h1>
+                            
+                            <div class="grid text-base">
+                                <div class="flex gap-1 items-center">
+                                    <strong class="font-normal">Алынған баға:</strong>
+                                    <span class="font-semibold">{{ user_lesson.rating }}</span>
+                                </div>
+                                
+                                <div class="flex gap-1 items-center">
+                                    <strong class="font-normal">Пайыздық мөлшері:</strong>
+                                    <span class="font-semibold">84%</span>
+                                </div>
+
+                                <div class="flex gap-1 items-center">
+                                    <strong class="font-normal">Қатысу уақыты:</strong>
+                                    <span class="font-semibold">38 мин</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Lesson plan -->
                 <div 
                     class="hidden" 
@@ -205,63 +250,10 @@
                     role="tabpanel"
                     aria-labelledby="plan-tab"
                 >
-                    <div class="grid grid-cols-3 gap-2 mb-4">
-                        {% if user_lesson.lesson.texts.all %}
-                            <div class="border border-border-200 rounded-lg p-4 font-medium">
-                                <h1 class="flex gap-2 items-center justify-center text-xl">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
-                                        class="lucide lucide-letter-text-icon lucide-letter-text">
-                                        <path d="M15 12h6" />
-                                        <path d="M15 6h6" />
-                                        <path d="m3 13 3.553-7.724a.5.5 0 0 1 .894 0L11 13" />
-                                        <path d="M3 18h18" />
-                                        <path d="M3.92 11h6.16" />
-                                    </svg>
-                                    {{ user_lesson.lesson.texts.count }}
-                                </h1>
-                                <span class="text-muted">Ауызша мәтін</span>
-                            </div>
-                        {% endif %}
-
-                        {% if user_lesson.lesson.videos.all %}
-                            <div class="border border-border-200 rounded-lg p-4 font-medium">
-                                <h1 class="flex gap-2 items-center justify-center text-xl">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
-                                        class="lucide lucide-file-play-icon lucide-file-play">
-                                        <path d="M14 2v4a2 2 0 0 0 2 2h4" />
-                                        <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z" />
-                                        <path
-                                            d="M15.033 13.44a.647.647 0 0 1 0 1.12l-4.065 2.352a.645.645 0 0 1-.968-.56v-4.704a.645.645 0 0 1 .967-.56z" />
-                                    </svg>
-                                    {{ user_lesson.lesson.videos.count }}
-                                </h1>
-                                <span class="text-muted">видео сабақ</span>
-                            </div>
-                        {% endif %}
-
-                        {% if user_lesson.lesson.frames.all %}
-                            <div class="border border-border-200 rounded-lg p-4 font-medium">
-                                <h1 class="flex gap-2 items-center justify-center text-xl">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-frame-icon lucide-frame">
-                                        <line x1="22" x2="2" y1="6" y2="6" />
-                                        <line x1="22" x2="2" y1="18" y2="18" />
-                                        <line x1="6" x2="6" y1="2" y2="22" />
-                                        <line x1="18" x2="18" y1="2" y2="22" />
-                                    </svg>
-                                    {{ user_lesson.lesson.frames.count }}
-                                </h1>
-                                <span class="text-muted">сыртқы ресурс</span>
-                            </div>
-                        {% endif %}
-                    </div>
-
                     <div class="grid gap-2 text-left">
                         <h1 class="font-medium">Тапсырмалар</h1>
                         <div class="grid gap-2">
-                            {% for task in user_lesson.lesson.tasks.all %}
+                            {% for task in tasks %}
                                 <div class="flex justify-between items-center gap-2 border border-border-200 rounded-lg p-4">
                                     <div class="flex gap-2">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -284,7 +276,7 @@
                                             <path
                                                 d="M13.849 4.22c-.684-1.626-3.014-1.626-3.698 0L8.397 8.387l-4.552.361c-1.775.14-2.495 2.331-1.142 3.477l3.468 2.937-1.06 4.392c-.413 1.713 1.472 3.067 2.992 2.149L12 19.35l3.897 2.354c1.52.918 3.405-.436 2.992-2.15l-1.06-4.39 3.468-2.938c1.353-1.146.633-3.336-1.142-3.477l-4.552-.36-1.754-4.17Z" />
                                         </svg>
-                                        <span class="block w-16 font-medium">{{ task.task_score }} - балл</span>
+                                        <span class="block w-16 font-medium">{{ task.rating }} - балл</span>
                                     </div>
                                 </div>
                             {% empty %}
@@ -305,7 +297,7 @@
                     </div>
                 </div>
 
-                <!-- Lesson about -->
+                <!-- Description -->
                 <div 
                     class="hidden" 
                     id="about" 
@@ -315,7 +307,6 @@
                     <div class="p-4 text-justify bg-secondary-100 rounded-lg">
                         {{ user_lesson.lesson.description|safe }}
                     </div>
-
                 </div>
                 
                 <!-- Materials -->
@@ -365,7 +356,6 @@
                             </div>
                         {% endfor %}
                     </div>
-
                 </div>
             </div>
         </div>

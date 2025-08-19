@@ -26,6 +26,6 @@ class UserAnswerTab(admin.TabularInline):
 
 @admin.register(UserTask)
 class UserTaskAdmin(admin.ModelAdmin):
-    list_display = ('user_lesson', 'task', 'submitted_at', 'score', 'is_completed', )
+    list_display = ('user_lesson', 'task', 'submitted_at', 'rating', 'is_completed', )
     list_filter = ('user_lesson', 'task', 'is_completed', )
     inlines = (UserVideoTab, UserWrittenTab, UserTextGapTab, UserAnswerTab, )

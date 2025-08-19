@@ -31,7 +31,7 @@ class UserLessonTab(admin.StackedInline):
 # UserSubject admin
 @admin.register(UserSubject)
 class UserSubjectAdmin(admin.ModelAdmin):
-    list_display = ('user', 'subject', 'created_at', 'is_completed', 'subject_score', )
+    list_display = ('user', 'subject', 'rating', 'percentage', 'created_at', 'is_completed', )
     list_filter = ('user', 'subject', 'is_completed', )
     search_fields = ('user__username', 'subject__title')
     inlines = (UserChapterTab, UserLessonTab, )
@@ -46,7 +46,7 @@ class UserTaskTab(admin.TabularInline):
 
 @admin.register(UserLesson)
 class UserLessonAdmin(admin.ModelAdmin):
-    list_display = ('user_subject', 'lesson', 'lesson_score', 'is_completed', 'completed_at', )
+    list_display = ('user_subject', 'lesson', 'rating', 'percentage', 'is_completed', 'completed_at', )
     list_filter = ('user_subject', 'lesson', 'is_completed', )
     search_fields = ('user__username', 'lesson__title')
     inlines = (UserTaskTab, )

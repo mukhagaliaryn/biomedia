@@ -19,7 +19,8 @@ class Task(models.Model):
         related_name='tasks', verbose_name=_('Сабақ')
     )
     task_type = models.CharField(_('Тапсырма түрі'), choices=TASK_TYPE, default='video', max_length=32)
-    task_score = models.PositiveIntegerField(_('Жалпы балл'), default=0)
+    rating = models.PositiveIntegerField(_('Жалпы бағасы'), default=0)
+    duration = models.PositiveSmallIntegerField(_('Тапсырма уақыты (мин)'), default=0)
     description = models.TextField(_('Анықтамасы'), blank=True, null=True)
     order = models.PositiveIntegerField(_('Реттілік нөмері'), default=0)
 
@@ -40,7 +41,6 @@ class Video(models.Model):
         verbose_name=_('Контент'), related_name='videos'
     )
     url = models.CharField(_('URL сілтеме'), max_length=255)
-    duration = models.PositiveSmallIntegerField(_('Видео уақыт'), default=0)
     order = models.PositiveIntegerField(_('Реттілік нөмері'), default=0)
 
     def __str__(self):
@@ -132,4 +132,3 @@ class Option(models.Model):
 
 # Task type: Matching model
 # ----------------------------------------------------------------------------------------------------------------------
-

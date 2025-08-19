@@ -236,61 +236,36 @@
             </div>
 
             <div class="w-full grid gap-2">
-                <div class="flex items-center py-2 px-4 border-b border-secondary-200">
-                    <div class="shrink-0">
-                        <img class="w-8 h-8 rounded-full" src="https://flowbite.com/docs/images/people/profile-picture-1.jpg" alt="Neil image">
+                {% for student in subject.user_subjects.all %}
+                    <div class="flex items-center py-2 px-4 border-b border-secondary-200">
+                        <div class="shrink-0">
+                            {% if student.user.avatar %}
+                                <img 
+                                    class="w-8 h-8 rounded-full"
+                                    src="{{ student.user.avatar.url }}" alt="user photo"
+                                >
+                            {% else %}
+                                <div 
+                                    class="w-8 h-8 rounded-full bg-secondary-100 flex items-center justify-center text-foreground"
+                                >
+                                    {{ student.user.first_name|first|upper }}{{ student.user.last_name|first|upper }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="flex-1 min-w-0 ms-4">
+                            <h1 class="text-base font-medium truncate">{{ student.user.first_name }} {{ student.user.last_name }}</h1>
+                            <p class="text-muted truncate ">{{ student.user.email }}</p>
+                        </div>
+                            
+                        <div 
+                            class="radial-progress bg-secondary-100 text-xs text-primary-700"
+                            style="--value:70; --size: 3rem;" 
+                            aria-valuenow="70" role="progressbar"
+                        >
+                            70%
+                        </div>
                     </div>
-                    <div class="flex-1 min-w-0 ms-4">
-                        <h1 class="text-base font-medium truncate">Neil Sims</h1>
-                        <p class="text-muted truncate ">email@windster.com</p>
-                    </div>
-                        
-                    <div 
-                        class="radial-progress bg-secondary-100 text-xs text-primary-700"
-                        style="--value:70; --size: 3rem;" 
-                        aria-valuenow="70" role="progressbar"
-                    >
-                        70%
-                    </div>
-                </div>
-
-                <div class="flex items-center py-2 px-4 border-b border-secondary-200">
-                    <div class="shrink-0">
-                        <img class="w-8 h-8 rounded-full" src="https://flowbite.com/docs/images/people/profile-picture-2.jpg" alt="Neil image">
-                    </div>
-                    <div class="flex-1 min-w-0 ms-4">
-                        <h1 class="text-base font-medium truncate">Neil Sims</h1>
-                        <p class="text-secondary-500 truncate ">email@windster.com</p>
-                    </div>
-                        
-                    <div 
-                        class="radial-progress bg-secondary-100 text-xs text-primary-700" 
-                        style="--value:65; --size: 3rem;" 
-                        aria-valuenow="65" 
-                        role="progressbar"
-                    >
-                        65%
-                    </div>
-                </div>
-
-                <div class="flex items-center py-2 px-4">
-                    <div class="shrink-0">
-                        <img class="w-8 h-8 rounded-full" src="https://flowbite.com/docs/images/people/profile-picture-3.jpg" alt="Neil image">
-                    </div>
-                    <div class="flex-1 min-w-0 ms-4">
-                        <h1 class="text-base font-medium truncate">Neil Sims</h1>
-                        <p class="text-muted truncate ">email@windster.com</p>
-                    </div>
-                        
-                    <div 
-                        class="radial-progress bg-secondary-100 text-xs text-primary-700" 
-                        style="--value:58; --size: 3rem;" 
-                        aria-valuenow="58" 
-                        role="progressbar"
-                    >
-                        58%
-                    </div>
-                </div>
+                {% endfor %}
             </div>
         </div>
 

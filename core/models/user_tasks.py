@@ -15,7 +15,7 @@ class UserTask(models.Model):
         related_name='user_tasks', verbose_name=_('Тапсырма')
     )
     submitted_at = models.DateTimeField(_('Жіберілген уақыты'), auto_now_add=True)
-    score = models.PositiveIntegerField(_('Бағасы'), default=0)
+    rating = models.PositiveSmallIntegerField(_('Жалпы бағасы'), default=0)
     is_completed = models.BooleanField(_('Орындалды'), default=False)
 
     class Meta:

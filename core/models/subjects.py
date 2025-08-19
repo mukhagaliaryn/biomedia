@@ -58,7 +58,6 @@ class Lesson(models.Model):
     description = models.TextField(_('Анықтамасы'), blank=True, null=True)
     date_created = models.DateTimeField(_('Date created'), auto_now_add=True)
     last_update = models.DateTimeField(_('Last update'), auto_now=True)
-    duration = models.PositiveSmallIntegerField(_('Сабақтың уақыты (мин)'), default=0)
     order = models.PositiveIntegerField(_('Реттілік нөмері'), default=0)
 
     def __str__(self):

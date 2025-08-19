@@ -44,7 +44,7 @@ class QuestionTab(SummernoteModelAdminMixin, admin.TabularInline):
 # Task admin
 @admin.register(Task)
 class TaskAdmin(SummernoteModelAdmin):
-    list_display = ('lesson', 'task_score', 'order', )
+    list_display = ('lesson', 'rating', 'duration', 'order', )
     readonly_fields = ('lesson_link', )
     inlines = (VideoTab, WrittenTab, TextGapTab, QuestionTab, )
 
