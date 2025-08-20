@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from core.models import Task, Option, UserLesson, Video, Written, TextGap, Question
+from core.models import Task, Option, UserLesson, Video, Written, TextGap, Question, MatchingItem, MatchingColumn
 
 
 # UserTask model
@@ -101,3 +101,25 @@ class UserAnswer(models.Model):
     class Meta:
         verbose_name = _('Таңдалған жауап')
         verbose_name_plural = _('Таңдалған жауаптар')
+
+
+
+# UserMatchingAnswer model
+# ----------------------------------------------------------------------------------------------------------------------
+class UserMatchingAnswer(models.Model):
+    user_task = models.ForeignKey(
+        UserTask, related_name='answers',
+        on_delete=models.CASCADE, verbose_name=_('Қолданушының тапсырмасы')
+    )
+    item = models.ForeignKey(
+        MatchingItem, on_delete=models.CASCADE, verbose_name=_('Жауап')
+    )
+    selected_column = models.ForeignKey(
+        MatchingColumn, on_delete=models.CASCADE,
+        verbose_name=_('Баған')
+    )
+    is_correct = models.BooleanField(_('Дұрыс жауап'), default=False)
+
+    def check_answer(self):
+        self.is_correct = self.item.correct_column_id == self.selected_column_id
+        self.save()

@@ -121,9 +121,11 @@
                                         <div class="flex-1 grid gap-4">
                                             <div>
                                                 <h1 class="text-xl font-semibold">{{ item.user_subject.subject.name }}</h1>
-                                                <span class="text-muted">
-                                                    ID нөмерлер: пән - {{ item.user_subject.id }}, бөлім - {{ item.first_chapter_id }}, сабақ - {{ item.first_lesson_id }}
-                                                </span>
+                                                <div class="text-muted">
+                                                    <span>Пән - {{ item.user_subject.rating }} - балл</span>
+                                                    <span>Бөлім - {{ item.first_chapter.rating }} - балл</span>
+                                                    <span>Сабақ - {{ item.first_lesson.rating }} - балл</span>
+                                                </div>
                                             </div>
 
                                             <div class="flex gap-4 justify-between">

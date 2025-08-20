@@ -71,6 +71,7 @@ def user_lesson_view(request, subject_id, chapter_id, lesson_id):
 
 
 # actions
+# ----------------------------------------------------------------------------------------------------------------------
 @login_required
 @role_required('student')
 def lesson_start_handler(request, subject_id, chapter_id, lesson_id):
@@ -143,6 +144,62 @@ def lesson_start_handler(request, subject_id, chapter_id, lesson_id):
         )
 
     return redirect('user_lesson', subject_id=subject_id, chapter_id=chapter_id, lesson_id=lesson_id)
+
+
+@login_required
+@role_required('student')
+@require_POST
+def lesson_finish_handler(request, subject_id, chapter_id, lesson_id):
+    user = request.user
+
+    user_subject = get_object_or_404(UserSubject, user=user, pk=subject_id)
+    user_chapter = get_object_or_404(UserChapter, user_subject=user_subject, pk=chapter_id)
+    user_lesson = get_object_or_404(UserLesson, user_subject=user_subject, pk=lesson_id)
+    user_tasks = UserTask.objects.filter(user_lesson=user_lesson)
+
+    # 1. user_lesson
+    if not user_lesson.is_completed:
+        total_rating = user_tasks.aggregate(total=Sum('rating')).get('total', 0)
+        user_lesson.rating = total_rating
+        user_lesson.status = 'finished'
+        user_lesson.completed_at = timezone.now()
+        user_lesson.is_completed = True
+
+        total_user_lessons = UserLesson.objects.filter(user_subject=user_subject).count()
+        completed_user_lessons = UserLesson.objects.filter(user_subject=user_subject, is_completed=True).count()
+        user_lesson.percentage = round((completed_user_lessons / total_user_lessons) * 100, 2) if total_user_lessons else 0
+        user_lesson.save()
+        messages.success(request, 'Сабақ сәтті аяқталды!')
+
+    # 2. user_chapter
+    chapter_lessons = UserLesson.objects.filter(user_subject=user_subject, lesson__chapter=user_chapter.chapter)
+    total_chapter_rating = chapter_lessons.aggregate(total=Sum('rating')).get('total', 0)
+    chapter_total_count = UserChapter.objects.filter(user_subject=user_subject).count()
+    chapter_completed_count = UserChapter.objects.filter(user_subject=user_subject, is_completed=True).count()
+
+
+    user_chapter.rating = total_chapter_rating
+    user_chapter.percentage = round((chapter_completed_count / chapter_total_count) * 100, 2) if chapter_total_count else 0
+    user_chapter.is_completed = chapter_completed_count == chapter_total_count
+    user_chapter.save()
+
+    # 3. user_subject
+    subject_lessons = UserLesson.objects.filter(user_subject=user_subject)
+    subject_rating_total = subject_lessons.aggregate(total=Sum('rating')).get('total', 0)
+    subject_total = UserSubject.objects.filter(user=user).count()
+    subject_completed = UserSubject.objects.filter(user=user, is_completed=True).count()
+
+    user_subject.rating = subject_rating_total
+    user_subject.percentage = round((subject_completed / subject_total) * 100, 2) if subject_total else 0
+    user_subject.is_completed = subject_completed == subject_total
+    if user_subject.is_completed:
+        user_subject.completed_at = timezone.now()
+    user_subject.save()
+
+    return redirect(
+        'user_lesson',
+        subject_id=subject_id, chapter_id=chapter_id, lesson_id=lesson_id,
+    )
 
 
 # user_lesson_task page
@@ -337,61 +394,3 @@ def user_lesson_task_view(request, subject_id, chapter_id, lesson_id, task_id):
     }
 
     return render(request, 'app/dashboard/student/user/subject/chapter/lesson/task/page.html', context)
-
-
-
-@login_required
-@role_required('student')
-@require_POST
-def lesson_finish_handler(request, subject_id, chapter_id, lesson_id):
-    user = request.user
-
-    user_subject = get_object_or_404(UserSubject, user=user, pk=subject_id)
-    user_chapter = get_object_or_404(UserChapter, user_subject=user_subject, pk=chapter_id)
-    user_lesson = get_object_or_404(UserLesson, user_subject=user_subject, pk=lesson_id)
-
-    user_tasks = UserTask.objects.filter(user_lesson=user_lesson)
-
-    # 1. user_lesson
-    if not user_lesson.is_completed:
-        total_rating = user_tasks.aggregate(total=Sum('rating')).get('total', 0)
-        user_lesson.rating = total_rating
-        user_lesson.status = 'finished'
-        user_lesson.completed_at = timezone.now()
-        user_lesson.is_completed = True
-
-        total_user_lessons = UserLesson.objects.filter(user_subject=user_subject).count()
-        completed_user_lessons = UserLesson.objects.filter(user_subject=user_subject, is_completed=True).count()
-        user_lesson.percentage = round((completed_user_lessons / total_user_lessons) * 100, 2) if total_user_lessons else 0
-        user_lesson.save()
-        messages.success(request, 'Сабақ сәтті аяқталды!')
-
-    # 2. user_chapter
-    chapter_lessons = UserLesson.objects.filter(user_subject=user_subject, lesson__chapter=user_chapter.chapter)
-    total_chapter_rating = chapter_lessons.aggregate(total=Sum('rating')).get('total', 0)
-    chapter_total_count = UserChapter.objects.filter(user_subject=user_subject).count()
-    chapter_completed_count = UserChapter.objects.filter(user_subject=user_subject, is_completed=True).count()
-
-
-    user_chapter.rating = total_chapter_rating
-    user_chapter.percentage = round((chapter_completed_count / chapter_total_count) * 100, 2) if chapter_total_count else 0
-    user_chapter.is_completed = chapter_completed_count == chapter_total_count
-    user_chapter.save()
-
-    # 3. user_subject
-    subject_lessons = UserLesson.objects.filter(user_subject=user_subject)
-    subject_rating_total = subject_lessons.aggregate(total=Sum('rating')).get('total', 0)
-    subject_completed = subject_lessons.filter(is_completed=True).count()
-    subject_total = subject_lessons.count()
-
-    user_subject.rating = subject_rating_total
-    user_subject.percentage = round((subject_completed / subject_total) * 100, 2) if subject_total else 0
-    user_subject.is_completed = subject_completed == subject_total
-    if user_subject.is_completed:
-        user_subject.completed_at = timezone.now()
-    user_subject.save()
-
-    return redirect(
-        'user_lesson',
-        subject_id=subject_id, chapter_id=chapter_id, lesson_id=lesson_id,
-    )

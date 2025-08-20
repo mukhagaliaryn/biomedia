@@ -13,7 +13,7 @@ from core.utils.decorators import role_required
 def student_view(request):
     user = request.user
     subjects = Subject.objects.all()
-    students = UserSubject.objects.filter(subject__in=subjects).exclude(user=user)[:3]
+    students = UserSubject.objects.filter(subject__in=subjects)[:3]
     user_subjects_qs = UserSubject.objects.filter(user=user)
     user_subjects = {us.subject_id: us for us in user_subjects_qs}
     subject_list = []

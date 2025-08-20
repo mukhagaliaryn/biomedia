@@ -132,3 +132,31 @@ class Option(models.Model):
 
 # Task type: Matching model
 # ----------------------------------------------------------------------------------------------------------------------
+# MatchingColumn model
+class MatchingColumn(models.Model):
+    task = models.ForeignKey(
+        Task, related_name='columns',
+        on_delete=models.CASCADE, verbose_name=_('Тапсырма')
+    )
+    label = models.CharField(_('Атауы'), max_length=255)
+    order = models.PositiveIntegerField(_('Реттілігі'), default=0)
+
+    def __str__(self):
+        return f'{self.task.title} - {self.label}'
+
+
+# MatchingItem model
+class MatchingItem(models.Model):
+    task = models.ForeignKey(
+        Task, related_name='items',
+        on_delete=models.CASCADE, verbose_name=_('Тапсырма')
+    )
+    correct_column = models.ForeignKey(
+        MatchingColumn, related_name='correct_items',
+        on_delete=models.CASCADE, verbose_name=_('Тапсырма')
+    )
+    text = models.CharField(_('Жауабы'), max_length=255)
+
+    def __str__(self):
+        return self.text
+
