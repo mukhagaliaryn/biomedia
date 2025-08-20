@@ -20,25 +20,25 @@ def student_view(request):
 
     for subject in subjects:
         user_subject = user_subjects.get(subject.id)
-        first_chapter_id = None
-        first_lesson_id = None
+        first_chapter = None
+        first_lesson = None
 
         if user_subject:
             first_user_chapter = user_subject.user_chapters.first()
             if first_user_chapter:
-                first_chapter_id = first_user_chapter.id
+                first_chapter = first_user_chapter
 
                 first_user_lesson = user_subject.user_lessons.filter(
                     lesson__chapter=first_user_chapter.chapter
                 ).first()
                 if first_user_lesson:
-                    first_lesson_id = first_user_lesson.id
+                    first_lesson = first_user_lesson
 
         subject_list.append({
             'subject': subject,
             'user_subject': user_subject,
-            'first_chapter_id': first_chapter_id,
-            'first_lesson_id': first_lesson_id,
+            'first_chapter': first_chapter,
+            'first_lesson': first_lesson,
         })
 
     context = {

@@ -1,5 +1,6 @@
 {% extends "layouts/lesson_layout.html" %}
 {% load static %}
+{% load filters %}
 
 
 {% block title %}{{ user_lesson.lesson.title }}{% endblock title %}
@@ -213,11 +214,11 @@
                 >
                     <div class="flex items-start justify-center gap-8 p-4 text-left">
                         <div 
-                            class="radial-progress bg-secondary-100 text-xl font-medium text-primary-700" 
-                            style="--value:84; --size: 7rem;" 
-                            aria-valuenow="84" role="progressbar"
+                            class="radial-progress bg-secondary-100 text-2xl font-medium text-primary-700" 
+                            style="--value: {{ user_lesson.rating|times10 }}; --size: 10rem;" 
+                            aria-valuenow="{{ user_lesson.rating|times10 }}" role="progressbar"
                         >
-                            84%
+                            {{ user_lesson.rating|times10 }}%
                         </div>
 
                         <div class="grid gap-2">
@@ -231,12 +232,28 @@
                                 
                                 <div class="flex gap-1 items-center">
                                     <strong class="font-normal">Пайыздық мөлшері:</strong>
-                                    <span class="font-semibold">84%</span>
+                                    <span class="font-semibold">{{ user_lesson.rating|times10 }}%</span>
+                                </div>
+
+                                <div class="flex gap-1 items-center">
+                                    <strong class="font-normal">Басталған уақыты:</strong>
+                                    <span class="font-semibold">{{ user_lesson.started_at }}</span>
+                                </div>
+
+                                <div class="flex gap-1 items-center">
+                                    <strong class="font-normal">Аяқталған уақыты:</strong>
+                                    <span class="font-semibold">{{ user_lesson.completed_at }}</span>
                                 </div>
 
                                 <div class="flex gap-1 items-center">
                                     <strong class="font-normal">Қатысу уақыты:</strong>
-                                    <span class="font-semibold">38 мин</span>
+                                    {% with time=user_lesson.time_spent_hms %}
+                                        <span class="font-semibold">
+                                            {% if time.hours %}{{ time.hours }} сағ{% endif %}
+                                            {% if time.minutes %} {{ time.minutes }} мин{% endif %}
+                                            {% if time.seconds %} {{ time.seconds }} сек{% endif %}
+                                        </span>
+                                    {% endwith %}
                                 </div>
                             </div>
                         </div>

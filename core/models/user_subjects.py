@@ -1,4 +1,5 @@
 from django.db import models
+from datetime import timedelta
 from django.utils.translation import gettext_lazy as _
 from core.models import User, Subject, Lesson, Chapter
 
@@ -77,7 +78,7 @@ class UserLesson(models.Model):
     rating = models.PositiveSmallIntegerField(_('Жалпы бағасы'), default=0)
     percentage = models.DecimalField(_('Пайыздық мөлшері'), default=0, max_digits=5, decimal_places=2)
     status = models.CharField(_('Статус'), choices=LESSON_STATUS, max_length=64, default='no-started')
-    started_at = models.DateTimeField(_('Басталған уақыты'), auto_now_add=True)
+    started_at = models.DateTimeField(_('Басталған уақыты'), blank=True, null=True)
     completed_at = models.DateTimeField(_('Орындалған уақыты'), blank=True, null=True)
     is_completed = models.BooleanField(_('Орындалды'), default=False)
 
@@ -87,3 +88,24 @@ class UserLesson(models.Model):
 
     def __str__(self):
         return f'{self.user} | {self.lesson}'
+
+
+    @property
+    def time_spent(self) -> timedelta:
+        from django.utils.timezone import now
+
+        if not self.started_at:
+            return timedelta(0)
+        end_time = self.completed_at or now()
+        return end_time - self.started_at
+
+    @property
+    def time_spent_hms(self) -> dict:
+        total_seconds = int(self.time_spent.total_seconds())
+        minutes, seconds = divmod(total_seconds, 60)
+        hours, minutes = divmod(minutes, 60)
+        return {
+            'hours': hours,
+            'minutes': minutes,
+            'seconds': seconds,
+        }

@@ -7,8 +7,12 @@
         {% for uv in user_videos %}
             <div class="flex justify-between">
                 <div class="flex gap-2 bg-secondary-100 font-medium py-2 px-4 rounded-xl">
-                    <span>Қаралған уақыт: </span>
-                    <span>{{ uv.watched_seconds }} сек</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-clock4-icon lucide-clock-4">
+                        <path d="M12 6v6l4 2" />
+                        <circle cx="12" cy="12" r="10" />
+                    </svg>
+                    <span>{{ uv.watched_seconds|format_seconds }}</span>
                 </div>
 
                 <div class="flex gap-1 items-center font-medium px-4 py-2 rounded-xl bg-primary-100 text-primary-700">
@@ -34,10 +38,12 @@
         
         <div class="flex justify-between items-center">
             <div class="flex gap-2 bg-secondary-100 text-secondary-700 py-2 px-4 rounded-xl">
-                <span>Қаралған уақыт: </span>
-                <span>
-                    <span id="watched-timer">0</span> секунд
-                </span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-clock4-icon lucide-clock-4">
+                    <path d="M12 6v6l4 2" />
+                    <circle cx="12" cy="12" r="10" />
+                </svg>
+                <span id="watched-timer">0</span>
             </div>
 
             <button
@@ -65,10 +71,21 @@
             let secondsWatched = 0;
             const timerElement = document.getElementById("watched-timer");
 
+            function formatTime(seconds) {
+                const mins = Math.floor(seconds / 60);
+                const secs = seconds % 60;
+
+                if (mins > 0) {
+                    return `${mins} мин ${secs} сек`;
+                } else {
+                    return `${secs} сек`;
+                }
+            }
+
             const timer = setInterval(() => {
                 secondsWatched++;
                 if (timerElement) {
-                    timerElement.textContent = secondsWatched;
+                    timerElement.textContent = formatTime(secondsWatched);
                 }
             }, 1000);
 

@@ -18,3 +18,25 @@ def video_embed(url):
         video_id = match.group(1)
         return f"https://www.youtube.com/embed/{video_id}"
     return ''
+
+
+@register.filter
+def format_seconds(value):
+    try:
+        value = int(value)
+        minutes = value // 60
+        seconds = value % 60
+        if minutes > 0:
+            return f"{minutes} мин {seconds} сек"
+        else:
+            return f"{seconds} сек"
+    except:
+        return ''
+
+
+@register.filter
+def times10(value):
+    try:
+        return round(float(value) * 10)
+    except (TypeError, ValueError):
+        return 0
