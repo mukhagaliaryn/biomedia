@@ -15,7 +15,7 @@ def student_view(request):
     subjects = Subject.objects.all()
     students = UserSubject.objects.filter(subject__in=subjects)[:3]
     user_subjects_qs = UserSubject.objects.filter(user=user)
-    user_subjects = {us.subject_id: us for us in user_subjects_qs}
+    user_subjects = { us.subject_id: us for us in user_subjects_qs }
     subject_list = []
 
     for subject in subjects:
@@ -80,11 +80,27 @@ def subject_detail_view(request, pk):
             if first_user_lesson:
                 first_lesson_id = first_user_lesson.id
 
+    chapters = []
+    for chapter in subject.chapters.all():
+        lessons = []
+        for lesson in chapter.lessons.all():
+            lesson_duration = sum(task.duration for task in lesson.tasks.all())
+            lessons.append({
+                'lesson': lesson,
+                'duration': lesson_duration,
+            })
+
+        chapters.append({
+            'chapter': chapter,
+            'lessons': lessons,
+        })
+
     context = {
         'subject': subject,
         'user_subject': user_subject,
         'first_chapter_id': first_chapter_id,
         'first_lesson_id': first_lesson_id,
+        'chapters': chapters,
     }
     return render(request, 'app/dashboard/student/subject/page.html', context)
 

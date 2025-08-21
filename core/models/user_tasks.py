@@ -103,12 +103,11 @@ class UserAnswer(models.Model):
         verbose_name_plural = _('Таңдалған жауаптар')
 
 
-
 # UserMatchingAnswer model
 # ----------------------------------------------------------------------------------------------------------------------
 class UserMatchingAnswer(models.Model):
     user_task = models.ForeignKey(
-        UserTask, related_name='answers',
+        UserTask, related_name='matching_answers',
         on_delete=models.CASCADE, verbose_name=_('Қолданушының тапсырмасы')
     )
     item = models.ForeignKey(
@@ -116,10 +115,15 @@ class UserMatchingAnswer(models.Model):
     )
     selected_column = models.ForeignKey(
         MatchingColumn, on_delete=models.CASCADE,
-        verbose_name=_('Баған')
+        verbose_name=_('Баған'), null=True, blank=True,
     )
     is_correct = models.BooleanField(_('Дұрыс жауап'), default=False)
 
     def check_answer(self):
         self.is_correct = self.item.correct_column_id == self.selected_column_id
         self.save()
+
+    class Meta:
+        verbose_name = _('Қолданушының сәйкестендіруі')
+        verbose_name_plural = _('Қолданушының сәйкестендірулері')
+

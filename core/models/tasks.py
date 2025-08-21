@@ -142,21 +142,24 @@ class MatchingColumn(models.Model):
     order = models.PositiveIntegerField(_('Реттілігі'), default=0)
 
     def __str__(self):
-        return f'{self.task.title} - {self.label}'
+        return f'Сәйкес баған: {self.label} - бағаны'
+
+    class Meta:
+        verbose_name = _('Сәйкес баған')
+        verbose_name_plural = _('Сәйкес бағандар')
 
 
 # MatchingItem model
 class MatchingItem(models.Model):
-    task = models.ForeignKey(
-        Task, related_name='items',
-        on_delete=models.CASCADE, verbose_name=_('Тапсырма')
-    )
     correct_column = models.ForeignKey(
         MatchingColumn, related_name='correct_items',
         on_delete=models.CASCADE, verbose_name=_('Тапсырма')
     )
-    text = models.CharField(_('Жауабы'), max_length=255)
+    text = models.TextField(_('Жауабы'), null=True, blank=True)
 
     def __str__(self):
-        return self.text
+        return self.text[:32]
 
+    class Meta:
+        verbose_name = _('Сәйкес элемент')
+        verbose_name_plural = _('Сәйкес элементтер')

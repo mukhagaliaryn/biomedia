@@ -1,5 +1,5 @@
 from django.contrib import admin
-from core.models import UserTask, UserVideo, UserWritten, UserTextGap, UserAnswer
+from core.models import UserTask, UserVideo, UserWritten, UserTextGap, UserAnswer, UserMatchingAnswer
 
 
 # UserTask admin
@@ -24,8 +24,13 @@ class UserAnswerTab(admin.TabularInline):
     extra = 0
 
 
+class UserMatchingAnswerTab(admin.TabularInline):
+    model = UserMatchingAnswer
+    extra = 0
+
+
 @admin.register(UserTask)
 class UserTaskAdmin(admin.ModelAdmin):
     list_display = ('user_lesson', 'task', 'submitted_at', 'rating', 'is_completed', )
     list_filter = ('user_lesson', 'task', 'is_completed', )
-    inlines = (UserVideoTab, UserWrittenTab, UserTextGapTab, UserAnswerTab, )
+    inlines = (UserVideoTab, UserWrittenTab, UserTextGapTab, UserAnswerTab, UserMatchingAnswerTab, )

@@ -135,7 +135,7 @@
                                                         style="--value: {{ item.user_subject.percentage|floatformat:0 }}; --size: 4rem;" 
                                                         aria-valuenow="{{ item.user_subject.percentage|floatformat:0 }}" role="progressbar"
                                                     >
-                                                        {{ item.user_subject.percentage }}%
+                                                        {{ item.user_subject.percentage|floatformat:0 }}%
                                                     </div>
                                                     <p class="text-muted">Пән бойынша</p>
                                                 </div>
@@ -146,7 +146,7 @@
                                                         style="--value: {{ item.first_chapter.percentage|floatformat:0 }}; --size: 4rem;" 
                                                         aria-valuenow="{{ item.first_chapter.percentage|floatformat:0 }}" role="progressbar"
                                                     >
-                                                        {{ item.first_chapter.percentage }}%
+                                                        {{ item.first_chapter.percentage|floatformat:0 }}%
                                                     </div>
                                                     <p class="text-muted">Бөлім бойынша</p>
                                                 </div>
@@ -157,7 +157,7 @@
                                                         style="--value: {{ item.first_lesson.percentage|floatformat:0 }}; --size: 4rem;" 
                                                         aria-valuenow="{{ item.first_lesson.percentage|floatformat:0 }}" role="progressbar"
                                                     >
-                                                        {{ item.first_lesson.percentage }}%
+                                                        {{ item.first_lesson.percentage|floatformat:0 }}%
                                                     </div>
                                                     <p class="text-muted">Сабақ бойынша</p>
                                                 </div>
@@ -193,7 +193,7 @@
                                                 style="--value:70; --size: 3rem;" 
                                                 aria-valuenow="70" role="progressbar"
                                             >
-                                                70%
+                                                {{ student.percentage|floatformat:0 }}%
                                             </div>
                                         </div>
                                     {% empty %}

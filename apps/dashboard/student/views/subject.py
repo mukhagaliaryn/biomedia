@@ -5,7 +5,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from core.models import UserSubject, UserChapter, UserLesson, UserTask, UserVideo, UserWritten, UserTextGap, \
-    UserAnswer, Option, Task
+    UserAnswer, Option, Task, UserMatchingAnswer
 from core.utils.decorators import role_required
 
 
@@ -121,6 +121,14 @@ def lesson_start_handler(request, subject_id, chapter_id, lesson_id):
                     question=question
                 )
                 ua.options.set([])
+
+        elif task.task_type == 'matching':
+            for column in task.columns.all():
+                for item in column.correct_items.all():
+                    UserMatchingAnswer.objects.get_or_create(
+                        user_task=user_task,
+                        item=item,
+                    )
 
     user_lesson.status = 'in-progress'
     user_lesson.started_at = timezone.now()
@@ -375,6 +383,41 @@ def user_lesson_task_view(request, subject_id, chapter_id, lesson_id, task_id):
             else:
                 messages.error(request, 'Сіз ешбір сұраққа жауап бермедіңіз')
 
+            return redirect(
+                'user_lesson_task',
+                subject_id=subject_id, chapter_id=chapter_id, lesson_id=lesson_id, task_id=task_id
+            )
+
+        # -------------- matching --------------
+        elif user_task.task.task_type == 'matching':
+            for answer in user_task.matching_answers.all():
+                selected_column_id = request.POST.get(f'column_{answer.item.id}')
+                if selected_column_id:
+                    answer.selected_column_id = int(selected_column_id)
+                    answer.check_answer()
+
+            answers = user_task.matching_answers.all()
+            total = answers.count()
+            correct = answers.filter(is_correct=True).count()
+            wrong = total - correct
+
+            full_rating = user_task.task.rating
+            score = 0
+
+            if wrong == 0:
+                score = full_rating
+            elif wrong == 1:
+                score = full_rating / 2 if full_rating > 1 else 0
+            elif wrong > total / 2:
+                score = 0
+            else:
+                score = full_rating / 2 if full_rating > 1 else 0
+
+            user_task.rating = round(score, 2)
+            user_task.is_completed = True
+            user_task.save()
+
+            messages.success(request, 'Сәйкестендіру тапсырмасы сәтті жіберілді!')
             return redirect(
                 'user_lesson_task',
                 subject_id=subject_id, chapter_id=chapter_id, lesson_id=lesson_id, task_id=task_id

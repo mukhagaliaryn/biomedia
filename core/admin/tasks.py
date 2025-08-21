@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.urls import reverse
 from django.utils.html import format_html
 from django_summernote.admin import SummernoteModelAdmin, SummernoteModelAdminMixin
-from core.models import Task, Question, Option, Written, TextGap, Video
+from core.models import Task, Question, Option, Written, TextGap, Video, MatchingColumn, MatchingItem
 
 
 # Task admin
@@ -41,12 +41,27 @@ class QuestionTab(SummernoteModelAdminMixin, admin.TabularInline):
     view_link.short_description = 'Сұраққа сілтеме'
 
 
+# Matching Tab
+class MatchingColumnTab(admin.TabularInline):
+    model = MatchingColumn
+    extra = 0
+    readonly_fields = ('view_link', )
+
+    def view_link(self, obj):
+        if obj.pk:
+            url = reverse('admin:core_matchingcolumn_change', args=[obj.pk])
+            return format_html('<a href="{}" class="view-link">Толығырақ</a>', url)
+        return '-'
+
+    view_link.short_description = 'Сәйкес бағанға сілтеме'
+
+
 # Task admin
 @admin.register(Task)
 class TaskAdmin(SummernoteModelAdmin):
     list_display = ('lesson', 'rating', 'duration', 'order', )
     readonly_fields = ('lesson_link', )
-    inlines = (VideoTab, WrittenTab, TextGapTab, QuestionTab, )
+    inlines = (VideoTab, WrittenTab, TextGapTab, QuestionTab, MatchingColumnTab, )
 
     def lesson_link(self, obj):
         if obj.lesson:
@@ -83,6 +98,28 @@ class QuestionAdmin(SummernoteModelAdmin):
 # ----------------------------------------------------------------------------------------------------------------------
 @admin.register(TextGap)
 class TextGapAdmin(SummernoteModelAdmin):
+    readonly_fields = ('task_link',)
+
+    def task_link(self, obj):
+        if obj.task:
+            url = reverse('admin:core_task_change', args=[obj.task.id])
+            return format_html('<a href="{}" class="view-link">🔗 {} тапсырмасына өту</a>', url, obj.task.get_task_type_display())
+        return '— тапсырмамен байланыспаған'
+
+    task_link.short_description = 'Тапсырмаға сілтеме'
+
+
+# Task type:MatchingColumn admin
+# ----------------------------------------------------------------------------------------------------------------------
+class MatchingItemTab(admin.TabularInline):
+    model = MatchingItem
+    extra = 0
+
+
+@admin.register(MatchingColumn)
+class MatchingColumnAdmin(admin.ModelAdmin):
+    list_display = ('label', 'task', )
+    inlines = (MatchingItemTab, )
     readonly_fields = ('task_link',)
 
     def task_link(self, obj):
