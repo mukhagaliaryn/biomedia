@@ -34,11 +34,11 @@
         {% include 'components/app/task_matching.html' %}
     {% endif %}
 
-    <div class="absolute shadow rounded-xl bottom-10 right-10">
+    <div class="absolute shadow rounded-lg bottom-10 right-10">
         {% if all_tasks_completed and not user_lesson.is_completed %}
             {% include 'components/app/user/lesson/lesson_finish_modal.html' %}
         {% elif user_lesson.is_completed %}
-            <div class="grid p-4 rounded-xl bg-primary-100 text-green-700 text-left">
+            <div class="grid p-4 rounded-lg bg-primary-100 text-green-700 text-left">
                 <span class="font-medium">Бұл сабақ аяқталған.</span> 
                 <div class="flex gap-2 items-center">
                     Жинаған балл:
