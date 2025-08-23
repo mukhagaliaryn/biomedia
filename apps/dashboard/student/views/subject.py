@@ -17,8 +17,8 @@ from core.utils.decorators import role_required
 def user_lesson_view(request, subject_id, chapter_id, lesson_id):
     user = request.user
     user_subject = get_object_or_404(UserSubject, user=user, pk=subject_id)
-    user_chapter = get_object_or_404(UserChapter, user_subject=user_subject, pk=chapter_id)
     user_lesson = get_object_or_404(UserLesson, user_subject=user_subject, pk=lesson_id)
+    user_chapter = get_object_or_404(UserChapter, user_subject=user_subject, chapter=user_lesson.lesson.chapter)
     tasks = user_lesson.lesson.tasks.exclude(task_type='video')
     user_lessons_qs = UserLesson.objects.filter(user_subject=user_subject).order_by('lesson__order')
 
@@ -66,6 +66,7 @@ def user_lesson_view(request, subject_id, chapter_id, lesson_id):
         'total_duration': sum(task.duration for task in user_lesson.lesson.tasks.all()),
         'user_chapters': user_chapters,
         'user_lessons_by_chapter': user_lessons_by_chapter,
+        'active_chapter_id': user_chapter.pk,
     }
 
     return render(request, 'app/dashboard/student/user/subject/chapter/lesson/page.html', context)
@@ -211,6 +212,7 @@ def lesson_finish_handler(request, subject_id, chapter_id, lesson_id):
     quarter_lessons = Lesson.objects.filter(subject=user_subject.subject, lesson_type='quarter')
     user_quarter_lessons = UserLesson.objects.filter(user_subject=user_subject, lesson__in=quarter_lessons)
     total_by_quarters = sum([ul.rating for ul in user_quarter_lessons])
+    user_subject.rating = int(round(total_by_quarters / 4))
 
     # ---------------- user_chapter percentages ----------------
     chapter_lessons = Lesson.objects.filter(chapter=lesson.chapter)
@@ -227,7 +229,6 @@ def lesson_finish_handler(request, subject_id, chapter_id, lesson_id):
     subject_total = subject_lessons.count()
     subject_completed = subject_lessons.filter(is_completed=True).count()
 
-    user_subject.rating = int(round(total_by_quarters / 4))
     user_subject.percentage = round((subject_completed / subject_total) * 100, 2) if subject_total else 0
     user_subject.is_completed = subject_total > 0 and subject_total == subject_completed
     if user_subject.is_completed:

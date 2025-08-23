@@ -14,7 +14,7 @@
         id="accordion-collapse" 
         data-accordion="collapse" 
         data-active-classes="text-foreground"
-        data-inactive-classes="te"
+        data-inactive-classes="text-muted"
         class="max-w-md w-full border border-border-200 rounded-xl overflow-hidden"
     >
         {% for uc in user_chapters %}
@@ -23,7 +23,7 @@
                     type="button"
                     class="flex items-center justify-between w-full p-4 font-semibold bg-white border-b border-border-200"
                     data-accordion-target="#accordion-collapse-body-{{ uc.id }}" 
-                    aria-expanded="true"
+                    aria-expanded="{% if uc.id == active_chapter_id %}true{% else %}false{% endif %}"
                     aria-controls="accordion-collapse-body-{{ uc.id }}"
                 >
                     <div class="flex items-center gap-4">
@@ -48,8 +48,8 @@
                                     <span>{{ uc.rating }}</span>
                                 </div>
                             {% endif %}
-                            
-                            {% if uc.percentage|floatformat:0 == 0 %}
+
+                            {% if uc.percentage %}
                                 <div class="w-24 bg-secondary-200 rounded-full overflow-hidden">
                                     <div 
                                         class="bg-primary-600 text-xs font-medium text-blue-100 text-center p-0.5 leading-none rounded-full" 
@@ -70,7 +70,7 @@
             </h2>
             <div
                 id="accordion-collapse-body-{{ uc.id }}" 
-                class="hidden" 
+                class="{% if uc.id == active_chapter_id %}block{% else %}hidden{% endif %}" 
                 aria-labelledby="accordion-collapse-heading-{{ uc.id }}"
             >
                 <div class="grid gap-2 p-4 bg-secondary-100">
