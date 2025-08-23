@@ -215,10 +215,10 @@
                     <div class="flex items-start justify-center gap-8 p-4 text-left">
                         <div 
                             class="radial-progress bg-secondary-100 text-2xl font-medium text-primary-700" 
-                            style="--value: {{ user_lesson.rating|times10 }}; --size: 10rem;" 
-                            aria-valuenow="{{ user_lesson.rating|times10 }}" role="progressbar"
+                            style="--value: {{ user_lesson.percentage|floatformat:0 }}; --size: 10rem;" 
+                            aria-valuenow="{{ user_lesson.percentage|floatformat:0 }}" role="progressbar"
                         >
-                            {{ user_lesson.rating|times10 }}%
+                            {{ user_lesson.percentage|floatformat:0 }}%
                         </div>
 
                         <div class="grid gap-2">
@@ -232,17 +232,17 @@
                                 
                                 <div class="flex gap-1 items-center">
                                     <strong class="font-normal">Пайыздық мөлшері:</strong>
-                                    <span class="font-semibold">{{ user_lesson.rating|times10 }}%</span>
+                                    <span class="font-semibold">{{ user_lesson.percentage }}%</span>
                                 </div>
 
                                 <div class="flex gap-1 items-center">
                                     <strong class="font-normal">Басталған уақыты:</strong>
-                                    <span class="font-semibold">{{ user_lesson.started_at }}</span>
+                                    <span class="font-semibold">{{ user_lesson.started_at|date:"d.m.Y - H:i" }}</span>
                                 </div>
 
                                 <div class="flex gap-1 items-center">
                                     <strong class="font-normal">Аяқталған уақыты:</strong>
-                                    <span class="font-semibold">{{ user_lesson.completed_at }}</span>
+                                    <span class="font-semibold">{{ user_lesson.completed_at|date:"d.m.Y - H:i" }}</span>
                                 </div>
 
                                 <div class="flex gap-1 items-center">

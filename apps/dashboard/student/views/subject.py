@@ -1,3 +1,4 @@
+from django.db.models.aggregates import Avg
 from django.utils import timezone
 from django.contrib import messages
 from django.db.models import Sum
@@ -5,7 +6,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from core.models import UserSubject, UserChapter, UserLesson, UserTask, UserVideo, UserWritten, UserTextGap, \
-    UserAnswer, Option, Task, UserMatchingAnswer
+    UserAnswer, Option, Task, UserMatchingAnswer, Lesson
 from core.utils.decorators import role_required
 
 
@@ -72,6 +73,7 @@ def user_lesson_view(request, subject_id, chapter_id, lesson_id):
 
 # actions
 # ----------------------------------------------------------------------------------------------------------------------
+# start lesson
 @login_required
 @role_required('student')
 def lesson_start_handler(request, subject_id, chapter_id, lesson_id):
@@ -154,6 +156,7 @@ def lesson_start_handler(request, subject_id, chapter_id, lesson_id):
     return redirect('user_lesson', subject_id=subject_id, chapter_id=chapter_id, lesson_id=lesson_id)
 
 
+# finish lesson
 @login_required
 @role_required('student')
 @require_POST
@@ -163,51 +166,76 @@ def lesson_finish_handler(request, subject_id, chapter_id, lesson_id):
     user_subject = get_object_or_404(UserSubject, user=user, pk=subject_id)
     user_chapter = get_object_or_404(UserChapter, user_subject=user_subject, pk=chapter_id)
     user_lesson = get_object_or_404(UserLesson, user_subject=user_subject, pk=lesson_id)
+    lesson = user_lesson.lesson
     user_tasks = UserTask.objects.filter(user_lesson=user_lesson)
 
-    # 1. user_lesson
-    if not user_lesson.is_completed:
+    if user_lesson.is_completed:
+        return redirect('user_lesson', subject_id=subject_id, chapter_id=chapter_id, lesson_id=lesson_id)
+
+    # ---------------- Lesson type: lesson ----------------
+    if lesson.lesson_type == 'lesson':
         total_rating = user_tasks.aggregate(total=Sum('rating')).get('total', 0)
         user_lesson.rating = total_rating
-        user_lesson.status = 'finished'
-        user_lesson.completed_at = timezone.now()
-        user_lesson.is_completed = True
+        user_lesson.percentage = int(round(user_lesson.rating * 10))
 
-        total_user_lessons = UserLesson.objects.filter(user_subject=user_subject).count()
-        completed_user_lessons = UserLesson.objects.filter(user_subject=user_subject, is_completed=True).count()
-        user_lesson.percentage = round((completed_user_lessons / total_user_lessons) * 100, 2) if total_user_lessons else 0
-        user_lesson.save()
-        messages.success(request, 'Сабақ сәтті аяқталды!')
+    # ---------------- Lesson type: chapter ----------------
+    elif lesson.lesson_type == 'chapter':
+        lessons = Lesson.objects.filter(chapter=lesson.chapter, lesson_type='lesson')
+        user_lessons = UserLesson.objects.filter(user_subject=user_subject, lesson__in=lessons)
+        avg_user_lessons_rating = user_lessons.aggregate(avg=Avg('rating')).get('avg', 0) or 0
 
-    # 2. user_chapter
-    chapter_lessons = UserLesson.objects.filter(user_subject=user_subject, lesson__chapter=user_chapter.chapter)
-    total_chapter_rating = chapter_lessons.aggregate(total=Sum('rating')).get('total', 0)
-    chapter_total_count = UserChapter.objects.filter(user_subject=user_subject).count()
-    chapter_completed_count = UserChapter.objects.filter(user_subject=user_subject, is_completed=True).count()
+        section_rating = user_tasks.aggregate(total=Sum('rating')).get('total', 0)
+        user_lesson.rating = section_rating
 
+        user_chapter.rating = round((avg_user_lessons_rating * 0.25) + (section_rating * 0.25))
+        user_lesson.percentage = int(round(user_lesson.rating * 10))
+        user_chapter.save()
 
-    user_chapter.rating = total_chapter_rating
-    user_chapter.percentage = round((chapter_completed_count / chapter_total_count) * 100, 2) if chapter_total_count else 0
-    user_chapter.is_completed = chapter_completed_count == chapter_total_count
+    # ---------------- Lesson type: quarter ----------------
+    elif lesson.lesson_type == 'quarter':
+        chapter_lessons = Lesson.objects.filter(chapter=lesson.chapter, lesson_type='chapter')
+        user_chapter_lessons = UserLesson.objects.filter(user_subject=user_subject, lesson__in=chapter_lessons)
+
+        avg_chapter_rating = user_chapter_lessons.aggregate(avg=Avg('rating')).get('avg', 0) or 0
+        quarter_rating = user_tasks.aggregate(total=Sum('rating')).get('total', 0)
+
+        user_lesson.rating = int(round(avg_chapter_rating + (quarter_rating * 0.5)))
+        user_lesson.percentage = int(round(user_lesson.rating * 10))
+
+    user_lesson.is_completed = True
+    user_lesson.completed_at = timezone.now()
+    user_lesson.status = 'finished'
+    user_lesson.save()
+
+    # ---------------- quarter_count/4 ----------------
+    quarter_lessons = Lesson.objects.filter(subject=user_subject.subject, lesson_type='quarter')
+    user_quarter_lessons = UserLesson.objects.filter(user_subject=user_subject, lesson__in=quarter_lessons)
+    total_by_quarters = sum([ul.rating for ul in user_quarter_lessons])
+
+    # ---------------- user_chapter percentages ----------------
+    chapter_lessons = Lesson.objects.filter(chapter=lesson.chapter)
+    user_chapter_lessons = UserLesson.objects.filter(user_subject=user_subject, lesson__in=chapter_lessons)
+    chapter_total = user_chapter_lessons.count()
+    chapter_completed = user_chapter_lessons.filter(is_completed=True).count()
+
+    user_chapter.percentage = round((chapter_completed / chapter_total) * 100, 2) if chapter_total else 0
+    user_chapter.is_completed = chapter_total > 0 and chapter_total == chapter_completed
     user_chapter.save()
 
-    # 3. user_subject
+    # ---------------- user_subject percentages ----------------
     subject_lessons = UserLesson.objects.filter(user_subject=user_subject)
-    subject_rating_total = subject_lessons.aggregate(total=Sum('rating')).get('total', 0)
-    subject_total = UserSubject.objects.filter(user=user).count()
-    subject_completed = UserSubject.objects.filter(user=user, is_completed=True).count()
+    subject_total = subject_lessons.count()
+    subject_completed = subject_lessons.filter(is_completed=True).count()
 
-    user_subject.rating = subject_rating_total
+    user_subject.rating = int(round(total_by_quarters / 4))
     user_subject.percentage = round((subject_completed / subject_total) * 100, 2) if subject_total else 0
-    user_subject.is_completed = subject_completed == subject_total
+    user_subject.is_completed = subject_total > 0 and subject_total == subject_completed
     if user_subject.is_completed:
         user_subject.completed_at = timezone.now()
     user_subject.save()
 
-    return redirect(
-        'user_lesson',
-        subject_id=subject_id, chapter_id=chapter_id, lesson_id=lesson_id,
-    )
+    messages.success(request, 'Сабақ сәтті аяқталды!')
+    return redirect('user_lesson', subject_id=subject_id, chapter_id=chapter_id, lesson_id=lesson_id)
 
 
 # user_lesson_task page

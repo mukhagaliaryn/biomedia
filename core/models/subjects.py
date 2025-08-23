@@ -46,6 +46,12 @@ class Chapter(models.Model):
 # Lesson model
 # ----------------------------------------------------------------------------------------------------------------------
 class Lesson(models.Model):
+    LESSON_TYPE = (
+        ('lesson', _('Сабақ')),
+        ('chapter', _('Бөлім')),
+        ('quarter', _('Тоқсан')),
+    )
+
     subject = models.ForeignKey(
         Subject, on_delete=models.CASCADE,
         verbose_name=_('Пән'), related_name='lessons', null=True, blank=True
@@ -55,6 +61,7 @@ class Lesson(models.Model):
         verbose_name=_('Модуль'), related_name='lessons'
     )
     title = models.CharField(_('Тақырыбы'), max_length=255)
+    lesson_type = models.CharField(_('Сабақ түрі'), max_length=32, choices=LESSON_TYPE, default='lesson')
     description = models.TextField(_('Анықтамасы'), blank=True, null=True)
     date_created = models.DateTimeField(_('Date created'), auto_now_add=True)
     last_update = models.DateTimeField(_('Last update'), auto_now=True)

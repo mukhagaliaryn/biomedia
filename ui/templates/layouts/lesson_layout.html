@@ -26,14 +26,38 @@
                     aria-expanded="true"
                     aria-controls="accordion-collapse-body-{{ uc.id }}"
                 >
-                    <div class="flex gap-2 items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
-                            class="lucide lucide-folder-open-icon lucide-folder-open">
-                            <path
-                                d="m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2" />
-                        </svg>
-                        <span>{{ uc.chapter.name }}</span>
+                    <div class="flex items-center gap-4">
+                        <div class="flex gap-2 items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+                                class="lucide lucide-folder-open-icon lucide-folder-open">
+                                <path
+                                    d="m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2" />
+                            </svg>
+                            <span>{{ uc.chapter.name }}</span>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            {% if uc.is_completed %}
+                                <div class="flex gap-1 items-center">
+                                    <svg class="w-5 h-5 text-amber-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24"
+                                        height="24" fill="currentColor" viewBox="0 0 24 24">
+                                        <path
+                                            d="M13.849 4.22c-.684-1.626-3.014-1.626-3.698 0L8.397 8.387l-4.552.361c-1.775.14-2.495 2.331-1.142 3.477l3.468 2.937-1.06 4.392c-.413 1.713 1.472 3.067 2.992 2.149L12 19.35l3.897 2.354c1.52.918 3.405-.436 2.992-2.15l-1.06-4.39 3.468-2.938c1.353-1.146.633-3.336-1.142-3.477l-4.552-.36-1.754-4.17Z" />
+                                    </svg>
+                                    <span>{{ uc.rating }}</span>
+                                </div>
+                            {% endif %}
+                            
+                            {% if uc.percentage|floatformat:0 == 0 %}
+                                <div class="w-24 bg-secondary-200 rounded-full overflow-hidden">
+                                    <div 
+                                        class="bg-primary-600 text-xs font-medium text-blue-100 text-center p-0.5 leading-none rounded-full" 
+                                        style="width: {{ uc.percentage|floatformat:0 }}%"
+                                    >{{ uc.percentage|floatformat:0 }}%</div>
+                                </div>
+                            {% endif %}
+                        </div>
                     </div>
                     
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -95,15 +119,15 @@
                                         <div class="grid flex-1">
                                             <h1 class="font-medium line-clamp-1">{{ ul.lesson.title }}</h1>
                                         </div>
+                                    </div>
 
-                                        <div class="flex gap-1 items-center">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-clock-icon lucide-clock">
-                                                <path d="M12 6v6l4 2" />
-                                                <circle cx="12" cy="12" r="10" />
-                                            </svg>
-                                            <span>{{ ul.total_duration }}:00</span>
-                                        </div>
+                                     <div class="flex gap-1 items-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-clock-icon lucide-clock">
+                                            <path d="M12 6v6l4 2" />
+                                            <circle cx="12" cy="12" r="10" />
+                                        </svg>
+                                        <span>{{ ul.total_duration }}:00</span>
                                     </div>
                                 </div>
                             {% endif %}

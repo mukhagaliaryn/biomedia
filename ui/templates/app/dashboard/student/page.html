@@ -190,8 +190,8 @@
                                                 
                                             <div 
                                                 class="radial-progress bg-secondary-100 text-xs text-primary-700" 
-                                                style="--value:70; --size: 3rem;" 
-                                                aria-valuenow="70" role="progressbar"
+                                                style="--value: {{ student.percentage|floatformat:0 }}; --size: 3rem;" 
+                                                aria-valuenow="{{ student.percentage|floatformat:0 }}" role="progressbar"
                                             >
                                                 {{ student.percentage|floatformat:0 }}%
                                             </div>
