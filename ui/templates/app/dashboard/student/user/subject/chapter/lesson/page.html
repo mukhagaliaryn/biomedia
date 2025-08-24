@@ -11,13 +11,26 @@
         <!-- Lesson description -->
         <div class="grid gap-4">
             <div class="grid gap-2 text-center">
-                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                    stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
-                    class="lucide lucide-presentation-icon lucide-presentation mx-auto">
-                    <path d="M2 3h20" />
-                    <path d="M21 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3" />
-                    <path d="m7 21 5-5 5 5" />
-                </svg>
+                {% if user_lesson.lesson.lesson_type == 'lesson' %}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+                        class="lucide lucide-presentation-icon lucide-presentation mx-auto">
+                        <path d="M2 3h20" />
+                        <path d="M21 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3" />
+                        <path d="m7 21 5-5 5 5" />
+                    </svg>
+                {% else %}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+                        class="lucide lucide-layout-list-icon lucide-layout-list mx-auto">
+                        <rect width="7" height="7" x="3" y="3" rx="1" />
+                        <rect width="7" height="7" x="3" y="14" rx="1" />
+                        <path d="M14 4h7" />
+                        <path d="M14 9h7" />
+                        <path d="M14 15h7" />
+                        <path d="M14 20h7" />
+                    </svg>
+                {% endif %}
                 <h1 class="text-2xl font-semibold">{{ user_lesson.lesson.title }}</h1>
             </div>
 
@@ -49,7 +62,7 @@
 
                 <div class="flex gap-2 items-center justify-center text-muted">
                     {% if user_lesson.status == 'finished' %}
-                        <div class="flex gap-2 items-center bg-primary-100 text-primary-700 rounded-xl px-2 py-1">
+                        <div class="flex gap-2 items-center bg-primary-100 text-primary-600 rounded-xl px-2 py-1">
                             <div class="w-2 h-2 rounded-full bg-primary-700"></div>
                             <span class="text-xs">{{ user_lesson.get_status_display }}</span>
                         </div>
@@ -148,7 +161,7 @@
                     data-tabs-toggle="#lesson-tab-content" 
                     role="tablist"
                     data-tabs-inactive-classes="text-muted border-transparent hover:border-b-border-200"
-                    data-tabs-active-classes="text-primary-700 hover:text-primary-800 border-primary-700"
+                    data-tabs-active-classes="text-primary-600 hover:text-primary-800 border-primary-600"
                 >  
                     {% if user_lesson.is_completed %}
                         <li class="me-2" role="presentation">
@@ -214,7 +227,7 @@
                 >
                     <div class="flex items-start justify-center gap-8 p-4 text-left">
                         <div 
-                            class="radial-progress bg-secondary-100 text-2xl font-medium text-primary-700" 
+                            class="radial-progress bg-secondary-100 text-2xl font-medium text-primary-600" 
                             style="--value: {{ user_lesson.percentage|floatformat:0 }}; --size: 10rem;" 
                             aria-valuenow="{{ user_lesson.percentage|floatformat:0 }}" role="progressbar"
                         >

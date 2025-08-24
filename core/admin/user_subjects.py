@@ -25,7 +25,7 @@ class UserLessonTab(admin.StackedInline):
             return format_html('<a href="{}" class="view-link">Толығырақ</a>', url)
         return '-'
 
-    view_link.short_description = _('Қолданушының сабағына сілтеме')
+    view_link.short_description = _('Қолданушының сабағы')
 
 
 # UserSubject admin
@@ -42,6 +42,15 @@ class UserSubjectAdmin(admin.ModelAdmin):
 class UserTaskTab(admin.TabularInline):
     model = UserTask
     extra = 0
+    readonly_fields = ('view_link',)
+
+    def view_link(self, obj):
+        if obj.pk:
+            url = reverse('admin:core_usertask_change', args=[obj.pk])
+            return format_html('<a href="{}" class="view-link">Толығырақ</a>', url)
+        return '-'
+
+    view_link.short_description = _('Қолданушының тапсырмасы')
 
 
 @admin.register(UserLesson)
@@ -55,7 +64,7 @@ class UserLessonAdmin(admin.ModelAdmin):
     def user_subject_link(self, obj):
         if obj.user_subject:
             url = reverse('admin:core_usersubject_change', args=[obj.user_subject.id])
-            return format_html('<a href="{}" class="view-link">🔗 {} пәніне өту</a>', url, obj.user_subject)
+            return format_html('<a href="{}" class="view-link">🔗 {}</a>', url, obj.user_subject)
         return '-'
 
-    user_subject_link.short_description = 'Қолданушының пәніне сілтеме'
+    user_subject_link.short_description = 'Қолданушының пәні'

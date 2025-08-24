@@ -181,38 +181,49 @@ def lesson_finish_handler(request, subject_id, chapter_id, lesson_id):
 
     # ---------------- Lesson type: chapter ----------------
     elif lesson.lesson_type == 'chapter':
-        lessons = Lesson.objects.filter(chapter=lesson.chapter, lesson_type='lesson')
-        user_lessons = UserLesson.objects.filter(user_subject=user_subject, lesson__in=lessons)
-        avg_user_lessons_rating = user_lessons.aggregate(avg=Avg('rating')).get('avg', 0) or 0
-
         section_rating = user_tasks.aggregate(total=Sum('rating')).get('total', 0)
         user_lesson.rating = section_rating
-
-        user_chapter.rating = round((avg_user_lessons_rating * 0.25) + (section_rating * 0.25))
         user_lesson.percentage = int(round(user_lesson.rating * 10))
+
+        user_chapter.rating = section_rating
         user_chapter.save()
 
     # ---------------- Lesson type: quarter ----------------
     elif lesson.lesson_type == 'quarter':
-        chapter_lessons = Lesson.objects.filter(chapter=lesson.chapter, lesson_type='chapter')
-        user_chapter_lessons = UserLesson.objects.filter(user_subject=user_subject, lesson__in=chapter_lessons)
-
-        avg_chapter_rating = user_chapter_lessons.aggregate(avg=Avg('rating')).get('avg', 0) or 0
         quarter_rating = user_tasks.aggregate(total=Sum('rating')).get('total', 0)
-
-        user_lesson.rating = int(round(avg_chapter_rating + (quarter_rating * 0.5)))
+        user_lesson.rating = quarter_rating
         user_lesson.percentage = int(round(user_lesson.rating * 10))
+
+        completed_lessons = UserLesson.objects.filter(
+            user_subject=user_subject,
+            lesson__lesson_type='lesson',
+            is_completed=True
+        )
+        avg_lesson_rating = completed_lessons.aggregate(avg=Avg('rating')).get('avg', 0) or 0
+        completed_chapters = UserLesson.objects.filter(
+            user_subject=user_subject,
+            lesson__lesson_type='chapter',
+            is_completed=True
+        )
+        avg_chapter_rating = completed_chapters.aggregate(avg=Avg('rating')).get('avg', 0) or 0
+
+        completed_quarters = UserLesson.objects.filter(
+            user_subject=user_subject,
+            lesson__lesson_type='quarter',
+            is_completed=True
+        )
+        avg_quarter_rating = completed_quarters.aggregate(avg=Avg('rating')).get('avg', 0) or 0
+        total_subject_rating = (
+                round(avg_lesson_rating * 0.25) +
+                round(avg_chapter_rating * 0.25) +
+                round(avg_quarter_rating * 0.5)
+        )
+        user_subject.rating = int(round(total_subject_rating))
 
     user_lesson.is_completed = True
     user_lesson.completed_at = timezone.now()
     user_lesson.status = 'finished'
     user_lesson.save()
-
-    # ---------------- quarter_count/4 ----------------
-    quarter_lessons = Lesson.objects.filter(subject=user_subject.subject, lesson_type='quarter')
-    user_quarter_lessons = UserLesson.objects.filter(user_subject=user_subject, lesson__in=quarter_lessons)
-    total_by_quarters = sum([ul.rating for ul in user_quarter_lessons])
-    user_subject.rating = int(round(total_by_quarters / 4))
 
     # ---------------- user_chapter percentages ----------------
     chapter_lessons = Lesson.objects.filter(chapter=lesson.chapter)
@@ -300,7 +311,7 @@ def user_lesson_task_view(request, subject_id, chapter_id, lesson_id, task_id):
                 user_task.is_completed = True
                 user_task.rating = user_task.task.rating
                 user_task.save()
-                messages.success(request, 'Видеосабақ аяқталды!')
+                messages.success(request, 'Видеосабақ аяқталды')
 
             return redirect(
                 'user_lesson_task',
@@ -320,7 +331,7 @@ def user_lesson_task_view(request, subject_id, chapter_id, lesson_id, task_id):
                     uw.is_submitted = True
                     uw.save()
 
-            messages.success(request, 'Барлық жауаптар сәтті жіберілді!')
+            messages.success(request, 'Барлық жауаптар жіберілді')
             return redirect(
                 'user_lesson_task',
                 subject_id=subject_id, chapter_id=chapter_id, lesson_id=lesson_id, task_id=task_id
@@ -349,26 +360,26 @@ def user_lesson_task_view(request, subject_id, chapter_id, lesson_id, task_id):
 
             if correct == total:
                 user_task.rating = full_rating
-                messages.success(request, 'Барлық жауап дұрыс!')
+                messages.success(request, 'Барлық жауап дұрыс')
             elif incorrect == 1:
                 if full_rating == 1:
                     user_task.rating = 0
                     messages.warning(request,
-                                     'Бір қате жібердіңіз. Бұл тапсырма тек 1 баллдық болғандықтан, ұпай берілмейді.')
+                                     'Бір қате жібердіңіз. Бұл тапсырма тек 1 баллдық болғандықтан, ұпай берілмейді')
                 else:
                     user_task.rating = int(full_rating / 2)
-                    messages.info(request, 'Бір қате бар. Жарты ұпай алдыңыз.')
+                    messages.info(request, 'Бір қате бар. Жарты ұпай алдыңыз')
             elif incorrect >= (total / 2):
                 user_task.rating = 0
-                messages.error(request, 'Қателер жартысынан көп. Ұпай берілмейді.')
+                messages.error(request, 'Қателер жартысынан көп. Ұпай берілмейді')
             else:
                 if full_rating == 1:
                     user_task.rating = 0
                     messages.warning(request,
-                                     'Кем дегенде бір дұрыс бар, бірақ тапсырма 1 баллдық болғандықтан ұпай берілмейді.')
+                                     'Кем дегенде бір дұрыс бар, бірақ тапсырма 1 баллдық болғандықтан ұпай берілмейді')
                 else:
                     user_task.rating = int(full_rating / 2)
-                    messages.warning(request, 'Бірнеше қате бар. Жарты ұпай алдыңыз.')
+                    messages.warning(request, 'Бірнеше қате бар. Жарты ұпай алдыңыз')
 
             user_task.is_completed = True
             user_task.save()
@@ -457,7 +468,7 @@ def user_lesson_task_view(request, subject_id, chapter_id, lesson_id, task_id):
             user_task.is_completed = True
             user_task.save()
 
-            messages.success(request, 'Сәйкестендіру тапсырмасы сәтті жіберілді!')
+            messages.success(request, 'Сәйкестендіру тапсырмасы аяқталды')
             return redirect(
                 'user_lesson_task',
                 subject_id=subject_id, chapter_id=chapter_id, lesson_id=lesson_id, task_id=task_id

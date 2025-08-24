@@ -43,7 +43,7 @@
                     data-tabs-toggle="#default-tab-content" 
                     role="tablist"
                     data-tabs-inactive-classes="text-muted border-transparent hover:border-b-secondary-200"
-                    data-tabs-active-classes="text-primary-700 hover:text-primary-800 border-primary-700"
+                    data-tabs-active-classes="text-primary-600 hover:text-primary-800 border-primary-600"
                 >
                     <li class="me-2" role="presentation">
                         <button 
@@ -218,7 +218,7 @@
                 {% csrf_token %}
                 <button
                     type="submit"
-                    class="flex gap-2 justify-center items-center w-full text-center cursor-pointer focus:outline-none text-white bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg px-5 py-2.5"
+                    class="flex gap-2 justify-center items-center w-full text-center cursor-pointer focus:outline-none text-white bg-primary-600 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg px-5 py-2.5"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus-icon lucide-plus">
@@ -258,7 +258,7 @@
                         </div>
                             
                         <div 
-                            class="radial-progress bg-secondary-100 text-xs text-primary-700"
+                            class="radial-progress bg-secondary-100 text-xs text-primary-600"
                             style="--value: {{ student.percentage|floatformat:0 }}; --size: 3rem;" 
                             aria-valuenow="{{ student.percentage|floatformat:0 }}" role="progressbar"
                         >
