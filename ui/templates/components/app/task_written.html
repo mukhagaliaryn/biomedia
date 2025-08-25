@@ -61,7 +61,7 @@
                     <div class="grid gap-4">
                         <div class="text-left">{{ uw.written.instruction|safe }}</div>
                         {% if uw.is_submitted %}
-                            <div class="grid gap-2 text-600-700">
+                            <div class="grid gap-2 text-primary-700">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                     stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
                                     class="lucide lucide-clock-fading-icon lucide-clock-fading mx-auto">
@@ -77,7 +77,7 @@
                         {% else %}
                             <div class="grid gap-2 text-left">
                                 <label class="font-medium">Жауабы</label>
-                                <textarea name="answer_{{ uw.id }}" class="w-full border border-border-200 rounded-xl bg-secondary-50" rows="10" required>{{ uw.answer }}</textarea>
+                                <textarea name="answer_{{ uw.id }}" class="w-full border border-border-200 rounded-lg bg-secondary-50" rows="10" required>{{ uw.answer }}</textarea>
                             </div>
 
                             <div class="grid gap-2 text-left">

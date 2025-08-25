@@ -95,6 +95,7 @@
                                 name="answer_{{ tg.id }}" 
                                 id="answer-input-{{ tg.id }}"
                                 class="block p-2.5 border border-border-300 text-foreground text-sm rounded-lg focus:ring-primary-600 focus:border-primary-700"
+                                required
                             >
 
                             <input type="hidden" id="correct-answer-{{ tg.id }}" value="{{ tg.text_gap.correct_answer|lower }}">
