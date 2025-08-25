@@ -25,7 +25,7 @@
             👋, {{ user.first_name }} {{ user.last_name }}
         </h1>
         <div class="flex justify-center">
-            <span class="flex items-center gap-1 bg-primary-100 text-primary-600 font-semibold px-2.5 py-0.5 rounded-sm">
+            <span class="flex items-center gap-1 bg-primary-100 text-primary-600 font-medium px-2.5 py-0.5 rounded-xl">
                 <div class="w-2 h-2 rounded-full bg-primary-600"></div>
                 {{ user.get_user_type_display }}
             </span>
@@ -249,19 +249,6 @@
                                 </div>
                             </div>
                         {% endif %}
-                    {% empty %}
-                        <div class="flex justify-center py-8">
-                            <div class="grid gap-2 text-muted">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-box-icon lucide-box mx-auto">
-                                    <path
-                                        d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
-                                    <path d="m3.3 7 8.7 5 8.7-5" />
-                                    <path d="M12 22V12" />
-                                </svg>
-                                <span>Сіз ешқандай пәндер тіркелмегенсіз</span>
-                            </div>
-                        </div>
                     {% endfor %}
                 </div>
             </div>
