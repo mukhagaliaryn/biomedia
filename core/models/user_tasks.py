@@ -127,3 +127,26 @@ class UserMatchingAnswer(models.Model):
         verbose_name = _('Қолданушының сәйкестендіруі')
         verbose_name_plural = _('Қолданушының сәйкестендірулері')
 
+
+# UserTableAnswer model
+# ----------------------------------------------------------------------------------------------------------------------
+class UserTableAnswer(models.Model):
+    user_task = models.ForeignKey(
+        UserTask, on_delete=models.CASCADE,
+        related_name='user_table_answers', verbose_name=_('Қолданушы тапсырмасы')
+    )
+    row = models.ForeignKey(
+        'core.TableRow', on_delete=models.CASCADE,
+        related_name='user_answers', verbose_name=_('Қатар')
+    )
+    column = models.ForeignKey(
+        'core.TableColumn', on_delete=models.CASCADE,
+        related_name='user_answers', verbose_name=_('Баған')
+    )
+    answer = models.TextField(_('Қолданушы жауабы'), max_length=255, blank=True, null=True)
+    is_submitted = models.BooleanField(_('Жіберілді'), default=False)
+
+    class Meta:
+        verbose_name = _('Кесте ұяшығына жауап')
+        verbose_name_plural = _('Кесте ұяшығына жауаптар')
+        unique_together = ('user_task', 'row', 'column')

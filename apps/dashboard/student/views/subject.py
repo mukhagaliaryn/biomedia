@@ -6,7 +6,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from core.models import UserSubject, UserChapter, UserLesson, UserTask, UserVideo, UserWritten, UserTextGap, \
-    UserAnswer, Option, Task, UserMatchingAnswer, Lesson
+    UserAnswer, Option, Task, UserMatchingAnswer, Lesson, UserTableAnswer
 from core.utils.decorators import role_required
 
 
@@ -133,16 +133,22 @@ def lesson_start_handler(request, subject_id, chapter_id, lesson_id):
                         item=item,
                     )
 
+        elif task.task_type == 'table':
+            rows = task.table_rows.all()
+            columns = task.table_columns.all()
+            for row in rows:
+                for column in columns:
+                    UserTableAnswer.objects.get_or_create(
+                        user_task=user_task,
+                        row=row,
+                        column=column,
+                    )
+
     user_lesson.status = 'in-progress'
     user_lesson.started_at = timezone.now()
     user_lesson.save()
 
-    first_user_task = (
-        user_lesson.user_tasks
-        .select_related('task')
-        .order_by('task__order')
-        .first()
-    )
+    first_user_task = user_lesson.user_tasks.select_related('task').order_by('task__order').first()
 
     if first_user_task:
         messages.success(request, 'Сабақ басталды!')
@@ -294,6 +300,20 @@ def user_lesson_task_view(request, subject_id, chapter_id, lesson_id, task_id):
 
     elif task_type == 'matching':
         related_data['user_matchings'] = user_task.matching_answers.all()
+
+    elif task_type == 'table':
+        rows = user_task.task.table_rows.order_by('order')
+        columns = user_task.task.table_columns.order_by('order')
+        answers = user_task.user_table_answers.select_related('row', 'column')
+
+        answer_matrix = {row.id: {} for row in rows}
+
+        for answer in answers:
+            answer_matrix[answer.row.id][answer.column.id] = answer
+
+        related_data['table_rows'] = rows
+        related_data['table_columns'] = columns
+        related_data['answer_matrix'] = answer_matrix
 
     all_tasks_completed = not user_tasks.exclude(is_completed=True).exists()
 
@@ -469,6 +489,25 @@ def user_lesson_task_view(request, subject_id, chapter_id, lesson_id, task_id):
             user_task.save()
 
             messages.success(request, 'Сәйкестендіру тапсырмасы аяқталды')
+            return redirect(
+                'user_lesson_task',
+                subject_id=subject_id, chapter_id=chapter_id, lesson_id=lesson_id, task_id=task_id
+            )
+
+        # -------------- table --------------
+        elif task_type == 'table':
+            for answer in user_task.user_table_answers.select_related('row', 'column'):
+                field_name = f'cell_{answer.row.id}_{answer.column.id}'
+                user_input = request.POST.get(field_name, '').strip()
+
+                answer.answer = user_input
+                answer.is_submitted = bool(user_input)
+                answer.save()
+
+            user_task.is_completed = True
+            user_task.save()
+
+            messages.success(request, 'Кесте тапсырмасы жіберілді')
             return redirect(
                 'user_lesson_task',
                 subject_id=subject_id, chapter_id=chapter_id, lesson_id=lesson_id, task_id=task_id

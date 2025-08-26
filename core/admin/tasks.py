@@ -2,7 +2,8 @@ from django.contrib import admin
 from django.urls import reverse
 from django.utils.html import format_html
 from django_summernote.admin import SummernoteModelAdmin, SummernoteModelAdminMixin
-from core.models import Task, Question, Option, Written, TextGap, Video, MatchingColumn, MatchingItem
+from core.models import Task, Question, Option, Written, TextGap, Video, MatchingColumn, MatchingItem, TableColumn, \
+    TableRow
 
 
 # Task admin
@@ -56,20 +57,73 @@ class MatchingColumnTab(admin.TabularInline):
     view_link.short_description = 'Сәйкес бағанға сілтеме'
 
 
-# Task admin
+# TableColumnTab
+class TableColumnTab(admin.TabularInline):
+    model = TableColumn
+    extra = 0
+    readonly_fields = ('view_link', )
+
+    def view_link(self, obj):
+        if obj.pk:
+            url = reverse('admin:core_tablecolumn_change', args=[obj.pk])
+            return format_html('<a href="{}" class="view-link">🔗 {}</a>', url, obj.label)
+        return '-'
+
+    view_link.short_description = 'Бағанға сілтеме'
+
+
+# TableRowTab
+class TableRowTab(admin.TabularInline):
+    model = TableRow
+    extra = 0
+    readonly_fields = ('view_link', )
+
+    def view_link(self, obj):
+        if obj.pk:
+            url = reverse('admin:core_tablerow_change', args=[obj.pk])
+            return format_html('<a href="{}" class="view-link">🔗 {}</a>', url, obj.label)
+        return '-'
+
+    view_link.short_description = 'Қатарға сілтеме'
+
+
+# ----------------------- Task admin -----------------------
 @admin.register(Task)
 class TaskAdmin(SummernoteModelAdmin):
     list_display = ('lesson', 'rating', 'duration', 'order', )
     readonly_fields = ('lesson_link', )
-    inlines = (VideoTab, WrittenTab, TextGapTab, QuestionTab, MatchingColumnTab, )
 
     def lesson_link(self, obj):
         if obj.lesson:
             url = reverse('admin:core_lesson_change', args=[obj.lesson.id])
-            return format_html('<a href="{}" class="view-link">🔗 {} пәніне өту</a>', url, obj.lesson.title)
+            return format_html('<a href="{}" class="view-link">🔗 {}</a>', url, obj.lesson.title)
         return '-'
 
     lesson_link.short_description = 'Сабаққа сілтеме'
+
+    def get_inline_instances(self, request, obj=None):
+        if obj is None:
+            return []
+
+        inline_instances = []
+
+        if obj.task_type == 'video':
+            inline_instances = [VideoTab(self.model, self.admin_site)]
+        elif obj.task_type == 'written':
+            inline_instances = [WrittenTab(self.model, self.admin_site)]
+        elif obj.task_type == 'text_gap':
+            inline_instances = [TextGapTab(self.model, self.admin_site)]
+        elif obj.task_type == 'test':
+            inline_instances = [QuestionTab(self.model, self.admin_site)]
+        elif obj.task_type == 'matching':
+            inline_instances = [MatchingColumnTab(self.model, self.admin_site)]
+        elif obj.task_type == 'table':
+            inline_instances = [
+                TableColumnTab(self.model, self.admin_site),
+                TableRowTab(self.model, self.admin_site),
+            ]
+
+        return inline_instances
 
 
 # Task type:Test admin
@@ -88,8 +142,8 @@ class QuestionAdmin(SummernoteModelAdmin):
     def task_link(self, obj):
         if obj.task:
             url = reverse('admin:core_task_change', args=[obj.task.id])
-            return format_html('<a href="{}" class="view-link">🔗 {} тапсырмаға өту</a>', url, obj.task)
-        return '— сұрақпен байланыспаған'
+            return format_html('<a href="{}" class="view-link">🔗 {}</a>', url, obj.task)
+        return '—'
 
     task_link.short_description = 'Сұраққа сілтеме'
 
@@ -111,11 +165,13 @@ class TextGapAdmin(SummernoteModelAdmin):
 
 # Task type:MatchingColumn admin
 # ----------------------------------------------------------------------------------------------------------------------
+# MatchingItemTab
 class MatchingItemTab(admin.TabularInline):
     model = MatchingItem
     extra = 0
 
 
+# MatchingColumnAdmin
 @admin.register(MatchingColumn)
 class MatchingColumnAdmin(admin.ModelAdmin):
     list_display = ('label', 'task', )
@@ -125,7 +181,39 @@ class MatchingColumnAdmin(admin.ModelAdmin):
     def task_link(self, obj):
         if obj.task:
             url = reverse('admin:core_task_change', args=[obj.task.id])
-            return format_html('<a href="{}" class="view-link">🔗 {} тапсырмасына өту</a>', url, obj.task.get_task_type_display())
-        return '— тапсырмамен байланыспаған'
+            return format_html('<a href="{}" class="view-link">🔗 {}</a>', url, obj.task.get_task_type_display())
+        return '—'
+
+    task_link.short_description = 'Тапсырмаға сілтеме'
+
+
+# Task type:Table admin
+# ----------------------------------------------------------------------------------------------------------------------
+# TableColumnAdmin
+@admin.register(TableColumn)
+class TableColumnAdmin(admin.ModelAdmin):
+    list_display = ('label', 'task', )
+    readonly_fields = ('task_link', )
+
+    def task_link(self, obj):
+        if obj.task:
+            url = reverse('admin:core_task_change', args=[obj.task.id])
+            return format_html('<a href="{}" class="view-link">🔗 {}</a>', url, obj.task)
+        return '-'
+
+    task_link.short_description = 'Тапсырмаға сілтеме'
+
+
+# TableRowAdmin
+@admin.register(TableRow)
+class TableRowAdmin(admin.ModelAdmin):
+    list_display = ('label', 'task', )
+    readonly_fields = ('task_link', )
+
+    def task_link(self, obj):
+        if obj.task:
+            url = reverse('admin:core_task_change', args=[obj.task.id])
+            return format_html('<a href="{}" class="view-link">🔗 {}</a>', url, obj.task)
+        return '-'
 
     task_link.short_description = 'Тапсырмаға сілтеме'

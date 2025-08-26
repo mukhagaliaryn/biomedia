@@ -32,6 +32,8 @@
         {% include 'components/app/task_test.html' %}
     {% elif task_type == 'matching' %}
         {% include 'components/app/task_matching.html' %}
+    {% elif task_type == 'table' %}
+        {% include 'components/app/task_table.html' %}
     {% endif %}
 
     <div class="absolute shadow rounded-lg bottom-10 right-10">

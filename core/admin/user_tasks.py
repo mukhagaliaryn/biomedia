@@ -1,8 +1,7 @@
 from django.contrib import admin
 from django.urls import reverse
 from django.utils.html import format_html
-
-from core.models import UserTask, UserVideo, UserWritten, UserTextGap, UserAnswer, UserMatchingAnswer
+from core.models import UserTask, UserVideo, UserWritten, UserTextGap, UserAnswer, UserMatchingAnswer, UserTableAnswer
 
 
 # UserTask admin
@@ -32,12 +31,16 @@ class UserMatchingAnswerTab(admin.TabularInline):
     extra = 0
 
 
+class UserTableAnswerTab(admin.TabularInline):
+    model = UserTableAnswer
+    extra = 0
+
+
 @admin.register(UserTask)
 class UserTaskAdmin(admin.ModelAdmin):
     list_display = ('user_lesson', 'task', 'submitted_at', 'rating', 'is_completed', )
     list_filter = ('user_lesson', 'task', 'is_completed', )
-    inlines = (UserVideoTab, UserWrittenTab, UserTextGapTab, UserAnswerTab, UserMatchingAnswerTab, )
-    readonly_fields = ('user_lesson_link',)
+    readonly_fields = ('user_lesson_link', )
 
     def user_lesson_link(self, obj):
         if obj.user_lesson:
@@ -46,3 +49,25 @@ class UserTaskAdmin(admin.ModelAdmin):
         return '-'
 
     user_lesson_link.short_description = 'Қолданушының сабағы'
+
+    def get_inline_instances(self, request, obj=None):
+        if obj is None or not obj.task:
+            return []
+
+        inlines = []
+
+        match obj.task.task_type:
+            case 'video':
+                inlines = [UserVideoTab]
+            case 'written':
+                inlines = [UserWrittenTab]
+            case 'text_gap':
+                inlines = [UserTextGapTab]
+            case 'test':
+                inlines = [UserAnswerTab]
+            case 'matching':
+                inlines = [UserMatchingAnswerTab]
+            case 'table':
+                inlines = [UserTableAnswerTab]
+
+        return [inline(self.model, self.admin_site) for inline in inlines]

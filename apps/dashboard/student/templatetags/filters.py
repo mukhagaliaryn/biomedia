@@ -10,6 +10,12 @@ def dict_get(d, key):
     return d.get(key, [])
 
 
+
+@register.filter
+def get_item(dictionary, key):
+    return dictionary.get(key)
+
+
 @register.filter
 def video_embed(url):
     regex = r'(?:youtube\.com/watch\?v=|youtu\.be/)([\w-]+)'

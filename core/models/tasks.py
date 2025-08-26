@@ -12,6 +12,19 @@ class Task(models.Model):
         ('text_gap', _('Толықтыру')),
         ('test', _('Тест')),
         ('matching', _('Сәйкестендіру')),
+        ('table', _('Кесте толтыру')),
+    )
+
+    PARAMS = (
+        ('none', _('Таңдалмаған')),
+        (_('Тест'), (
+            ('quiz', _('Тест')),
+            ('true-false', _('Ақиқат/жалған')),
+        )),
+        (_('Сәйкестендіру'), (
+            ('row', _('Қатар')),
+            ('col', _('Баған')),
+        )),
     )
 
     lesson = models.ForeignKey(
@@ -19,6 +32,7 @@ class Task(models.Model):
         related_name='tasks', verbose_name=_('Сабақ')
     )
     task_type = models.CharField(_('Тапсырма түрі'), choices=TASK_TYPE, default='video', max_length=32)
+    params = models.CharField(_('Параметрлер'), choices=PARAMS, default='none', max_length=32)
     rating = models.PositiveIntegerField(_('Жалпы бағасы'), default=0)
     duration = models.PositiveSmallIntegerField(_('Тапсырма уақыты (мин)'), default=0)
     description = models.TextField(_('Анықтамасы'), blank=True, null=True)
@@ -163,3 +177,41 @@ class MatchingItem(models.Model):
     class Meta:
         verbose_name = _('Сәйкес элемент')
         verbose_name_plural = _('Сәйкес элементтер')
+
+
+# Task type: Table model
+# ----------------------------------------------------------------------------------------------------------------------
+# TableColumn
+class TableColumn(models.Model):
+    task = models.ForeignKey(
+        Task, on_delete=models.CASCADE,
+        related_name='table_columns', verbose_name=_('Тапсырма')
+    )
+    label = models.CharField(_('Баған атауы'), max_length=255)
+    order = models.PositiveIntegerField(_('Реттілік нөмері'), default=0)
+
+    def __str__(self):
+        return f'Баған: {self.label}'
+
+    class Meta:
+        verbose_name = _('Кесте бағаны')
+        verbose_name_plural = _('Кесте бағандары')
+        ordering = ('order', )
+
+
+# TableRow
+class TableRow(models.Model):
+    task = models.ForeignKey(
+        Task, on_delete=models.CASCADE,
+        related_name='table_rows', verbose_name=_('Тапсырма')
+    )
+    label = models.CharField(_('Қатар атауы'), max_length=255)
+    order = models.PositiveIntegerField(_('Реттілік нөмері'), default=0)
+
+    def __str__(self):
+        return f'Қатар: {self.label}'
+
+    class Meta:
+        verbose_name = _('Кесте қатары')
+        verbose_name_plural = _('Кесте қатарлары')
+        ordering = ('order', )

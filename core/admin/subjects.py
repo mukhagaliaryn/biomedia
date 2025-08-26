@@ -100,7 +100,7 @@ class LessonAdmin(SummernoteModelAdmin):
     def subject_link(self, obj):
         if obj.subject:
             url = reverse('admin:core_subject_change', args=[obj.subject.id])
-            return format_html('<a href="{}" class="view-link">🔗 {} пәніне өту</a>', url, obj.subject.name)
+            return format_html('<a href="{}" class="view-link">🔗 {}</a>', url, obj.subject.name)
         return '-'
 
     subject_link.short_description = 'Пәнге сілтеме'
