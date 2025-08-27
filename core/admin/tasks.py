@@ -166,7 +166,7 @@ class TextGapAdmin(SummernoteModelAdmin):
 # Task type:MatchingColumn admin
 # ----------------------------------------------------------------------------------------------------------------------
 # MatchingItemTab
-class MatchingItemTab(admin.TabularInline):
+class MatchingItemTab(SummernoteModelAdminMixin, admin.TabularInline):
     model = MatchingItem
     extra = 0
 

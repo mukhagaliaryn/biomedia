@@ -21,6 +21,7 @@
                     <span>Орындалды</span>
                 </div>
             </div>
+            
             <div class="grid gap-4">
                 {% for uw in user_written %}
                     <div class="text-left">{{ uw.written.instruction|safe }}</div>
@@ -30,7 +31,6 @@
                     </div>
                 {% endfor %}
             </div>
-
         </div>
     {% else %}
         <div class="grid gap-4">
@@ -55,7 +55,7 @@
                 </div>
             </div>
 
-            <form class="grid gap-4" method="post" enctype="multipart/form-data">
+            <form method="post" enctype="multipart/form-data" class="grid gap-4">
                 {% csrf_token %}
                 {% for uw in user_written %}
                     <div class="grid gap-4">
@@ -77,7 +77,12 @@
                         {% else %}
                             <div class="grid gap-2 text-left">
                                 <label class="font-medium">Жауабы</label>
-                                <textarea name="answer_{{ uw.id }}" class="w-full border border-border-200 rounded-lg bg-secondary-50" rows="10" required>{{ uw.answer }}</textarea>
+                                <textarea 
+                                    id="summernote"
+                                    name="answer_{{ uw.id }}" 
+                                    class="w-full border border-border-200 rounded-lg bg-secondary-50" 
+                                    rows="10" required
+                                >{{ uw.answer }}</textarea>
                             </div>
 
                             <div class="grid gap-2 text-left">
@@ -99,12 +104,14 @@
 
                     </div>
                     {% if not uw.is_submitted %}
-                        <button
-                            type="submit"
-                            class="flex gap-2 justify-center items-center text-center cursor-pointer focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg px-5 py-2.5"
-                        >
-                            Видеосабақты аятау
-                        </button>
+                        <div class="flex justify-center">
+                            <button
+                                type="submit"
+                                class="flex gap-2 justify-center items-center text-center cursor-pointer focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg px-5 py-2.5"
+                            >
+                                Тапсырманы жіберу
+                            </button>
+                        </div>
                     {% endif %}
                 {% endfor %}
             </form>  

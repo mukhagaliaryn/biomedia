@@ -46,3 +46,9 @@ def times10(value):
         return round(float(value) * 10)
     except (TypeError, ValueError):
         return 0
+
+
+
+@register.filter
+def has_submitted_answers(user_table_answers):
+    return user_table_answers.filter(is_submitted=True).exists()

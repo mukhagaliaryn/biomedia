@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.urls import reverse
 from django.utils.html import format_html
+from django_summernote.admin import SummernoteModelAdminMixin
 from core.models import UserTask, UserVideo, UserWritten, UserTextGap, UserAnswer, UserMatchingAnswer, UserTableAnswer
 
 
@@ -11,7 +12,7 @@ class UserVideoTab(admin.TabularInline):
     extra = 0
 
 
-class UserWrittenTab(admin.TabularInline):
+class UserWrittenTab(SummernoteModelAdminMixin, admin.TabularInline):
     model = UserWritten
     extra = 0
 

@@ -410,53 +410,76 @@ def user_lesson_task_view(request, subject_id, chapter_id, lesson_id, task_id):
 
         # -------------- test --------------
         elif task_type == 'test':
-            total_score = 0
-            any_answered = False
+            total = user_task.user_options.count()
+            correct = 0
+            answered = 0
+            has_incorrect_simple = False
+            has_multiple_incorrect_count = 0
 
             for user_answer in user_task.user_options.select_related('question').prefetch_related('question__options'):
                 question = user_answer.question
-                selected_option_ids = request.POST.getlist(f'question_{question.id}')
+                selected_ids = request.POST.getlist(f'question_{question.id}')
+                selected_ids = list(map(int, selected_ids)) if selected_ids else []
 
-                if selected_option_ids:
-                    any_answered = True
+                if selected_ids:
+                    answered += 1
 
-                valid_option_ids = set(question.options.values_list('id', flat=True))
-                selected_option_ids = [int(opt_id) for opt_id in selected_option_ids if int(opt_id) in valid_option_ids]
+                valid_ids = set(question.options.values_list('id', flat=True))
+                selected_ids = [opt_id for opt_id in selected_ids if opt_id in valid_ids]
 
-                selected_options = Option.objects.filter(id__in=selected_option_ids)
+                selected_options = Option.objects.filter(id__in=selected_ids)
                 user_answer.options.set(selected_options)
 
-                correct_option_ids = set(
-                    question.options.filter(is_correct=True).values_list('id', flat=True)
-                )
+                correct_ids = set(question.options.filter(is_correct=True).values_list('id', flat=True))
+                selected_set = set(selected_ids)
 
-                selected_set = set(selected_option_ids)
-                incorrect_selected = selected_set - correct_option_ids
-
-                if len(correct_option_ids) == 1:
-                    selected_option = selected_options.first()
-                    if selected_option and selected_option.is_correct:
-                        total_score += selected_option.score
-
-                else:
-                    if selected_set == correct_option_ids:
-                        total_score += user_task.task.rating
-                    elif len(incorrect_selected) == 1:
-                        total_score += user_task.task.rating / 2
+                if question.question_type == 'simple':
+                    if len(selected_set) == 1 and selected_set.pop() in correct_ids:
+                        correct += 1
                     else:
-                        continue
+                        has_incorrect_simple = True
 
-            if any_answered:
-                user_task.rating = total_score
-                user_task.is_completed = True
-                user_task.save()
-                messages.success(request, f'Сіз {total_score} балл жинадыңыз!')
+                elif question.question_type == 'multiple':
+                    if selected_set == correct_ids:
+                        correct += 1
+                    else:
+                        incorrect_count = len(selected_set - correct_ids)
+                        if incorrect_count >= 1:
+                            has_multiple_incorrect_count += incorrect_count
+
+            full_rating = user_task.task.rating
+
+            if answered == 0:
+                messages.error(request, 'Сіз ешбір сұраққа жауап бермедіңіз.')
+                return redirect('user_lesson_task', subject_id=subject_id, chapter_id=chapter_id,
+                                lesson_id=lesson_id, task_id=task_id)
+
+            if has_incorrect_simple:
+                score = 0
+                messages.error(request, 'Бір жауапты сұрақта қате бар — ұпай берілмейді.')
+            elif has_multiple_incorrect_count == 1:
+                score = full_rating / 2 if full_rating > 1 else 0
+                messages.info(request, 'Көп жауапты сұрақта 1 қате бар. Жарты ұпай.')
+            elif has_multiple_incorrect_count > 1:
+                score = 0
+                messages.error(request, 'Көп жауапты сұрақта бірнеше қате бар. Ұпай берілмейді.')
+            elif correct == total:
+                score = full_rating
+                messages.success(request, 'Барлық жауап дұрыс!')
             else:
-                messages.error(request, 'Сіз ешбір сұраққа жауап бермедіңіз')
+                score = full_rating / 2 if full_rating > 1 else 0
+                messages.warning(request, 'Бірнеше қате бар. Жарты ұпай.')
+
+            user_task.rating = round(score, 2)
+            user_task.is_completed = True
+            user_task.save()
 
             return redirect(
                 'user_lesson_task',
-                subject_id=subject_id, chapter_id=chapter_id, lesson_id=lesson_id, task_id=task_id
+                subject_id=subject_id,
+                chapter_id=chapter_id,
+                lesson_id=lesson_id,
+                task_id=task_id
             )
 
         # -------------- matching --------------
@@ -504,9 +527,6 @@ def user_lesson_task_view(request, subject_id, chapter_id, lesson_id, task_id):
                 answer.is_submitted = bool(user_input)
                 answer.save()
 
-            user_task.is_completed = True
-            user_task.save()
-
             messages.success(request, 'Кесте тапсырмасы жіберілді')
             return redirect(
                 'user_lesson_task',
@@ -520,6 +540,7 @@ def user_lesson_task_view(request, subject_id, chapter_id, lesson_id, task_id):
         'user_task': user_task,
         'user_tasks': user_tasks,
         'task_type': task_type,
+
         'all_tasks_completed': all_tasks_completed,
         'next_user_task': next_user_task,
         'prev_user_task': prev_user_task,

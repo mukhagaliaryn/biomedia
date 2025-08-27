@@ -89,7 +89,7 @@
                     {% for answer in user_task.matching_answers.all %}
                         {% if not answer.selected_column %}
                             <div class="draggable item bg-amber-200 rounded-lg py-2 px-4 cursor-move" draggable="true" data-item-id="{{ answer.item.id }}">
-                                {{ answer.item.text }}
+                                {{ answer.item.text|safe }}
                                 <input type="hidden" name="column_{{ answer.item.id }}" value="">
                             </div>
                         {% endif %}
