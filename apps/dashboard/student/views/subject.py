@@ -282,8 +282,8 @@ def user_lesson_task_view(request, subject_id, chapter_id, lesson_id, task_id):
     except ValueError:
         pass
 
+    # user tasks...
     related_data = {}
-
     task_type = user_task.task.task_type
 
     if task_type == 'video':
@@ -333,11 +333,6 @@ def user_lesson_task_view(request, subject_id, chapter_id, lesson_id, task_id):
                 user_task.save()
                 messages.success(request, 'Видеосабақ аяқталды')
 
-            return redirect(
-                'user_lesson_task',
-                subject_id=subject_id, chapter_id=chapter_id, lesson_id=lesson_id, task_id=task_id
-            )
-
         # -------------- written --------------
         elif task_type == 'written':
             for uw in user_task.user_written.all():
@@ -352,10 +347,6 @@ def user_lesson_task_view(request, subject_id, chapter_id, lesson_id, task_id):
                     uw.save()
 
             messages.success(request, 'Барлық жауаптар жіберілді')
-            return redirect(
-                'user_lesson_task',
-                subject_id=subject_id, chapter_id=chapter_id, lesson_id=lesson_id, task_id=task_id
-            )
 
         # -------------- text_gap --------------
         elif task_type == 'text_gap':
@@ -403,10 +394,6 @@ def user_lesson_task_view(request, subject_id, chapter_id, lesson_id, task_id):
 
             user_task.is_completed = True
             user_task.save()
-            return redirect(
-                'user_lesson_task',
-                subject_id=subject_id, chapter_id=chapter_id, lesson_id=lesson_id, task_id=task_id
-            )
 
         # -------------- test --------------
         elif task_type == 'test':
@@ -451,8 +438,10 @@ def user_lesson_task_view(request, subject_id, chapter_id, lesson_id, task_id):
 
             if answered == 0:
                 messages.error(request, 'Сіз ешбір сұраққа жауап бермедіңіз.')
-                return redirect('user_lesson_task', subject_id=subject_id, chapter_id=chapter_id,
-                                lesson_id=lesson_id, task_id=task_id)
+                return redirect(
+                    'user_lesson_task',
+                    subject_id=subject_id, chapter_id=chapter_id, lesson_id=lesson_id, task_id=task_id
+                )
 
             if has_incorrect_simple:
                 score = 0
@@ -473,14 +462,6 @@ def user_lesson_task_view(request, subject_id, chapter_id, lesson_id, task_id):
             user_task.rating = round(score, 2)
             user_task.is_completed = True
             user_task.save()
-
-            return redirect(
-                'user_lesson_task',
-                subject_id=subject_id,
-                chapter_id=chapter_id,
-                lesson_id=lesson_id,
-                task_id=task_id
-            )
 
         # -------------- matching --------------
         elif user_task.task.task_type == 'matching':
@@ -512,10 +493,6 @@ def user_lesson_task_view(request, subject_id, chapter_id, lesson_id, task_id):
             user_task.save()
 
             messages.success(request, 'Сәйкестендіру тапсырмасы аяқталды')
-            return redirect(
-                'user_lesson_task',
-                subject_id=subject_id, chapter_id=chapter_id, lesson_id=lesson_id, task_id=task_id
-            )
 
         # -------------- table --------------
         elif task_type == 'table':
@@ -528,10 +505,11 @@ def user_lesson_task_view(request, subject_id, chapter_id, lesson_id, task_id):
                 answer.save()
 
             messages.success(request, 'Кесте тапсырмасы жіберілді')
-            return redirect(
-                'user_lesson_task',
-                subject_id=subject_id, chapter_id=chapter_id, lesson_id=lesson_id, task_id=task_id
-            )
+
+        return redirect(
+            'user_lesson_task',
+            subject_id=subject_id, chapter_id=chapter_id, lesson_id=lesson_id, task_id=task_id
+        )
 
     context = {
         'user_subject': user_subject,
