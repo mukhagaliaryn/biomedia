@@ -24,7 +24,7 @@
             
             <div class="grid gap-4">
                 {% for uw in user_written %}
-                    <div class="text-left">{{ uw.written.instruction|safe }}</div>
+                    <div class="richtext text-left">{{ uw.written.instruction|safe }}</div>
                     <div class="grid gap-2 p-4 text-left bg-secondary-100 rounded-xl">
                         <span class="text-muted">Сіздің жауабыңыз</span>                        
                         <div class="">{{ uw.answer|safe }}</div>
@@ -59,7 +59,7 @@
                 {% csrf_token %}
                 {% for uw in user_written %}
                     <div class="grid gap-4">
-                        <div class="text-left">{{ uw.written.instruction|safe }}</div>
+                        <div class="richtext text-left">{{ uw.written.instruction|safe }}</div>
                         {% if uw.is_submitted %}
                             <div class="grid gap-2 text-primary-700">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor"

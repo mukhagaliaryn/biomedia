@@ -23,18 +23,41 @@
                 </div>
             </div>
 
-            <table class="w-full text-center">
-                <thead>
-                    <tr>
-                        {% for column in user_task.task.columns.all %}
-                            <th class="border border-border-200 p-2 bg-secondary-100 font-semibold">{{ column.label }}</th>
-                        {% endfor %}
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        {% for column in user_task.task.columns.all %}
-                            <td class="border border-border-200 align-top min-h-[100px] p-2">
+            {% if user_task.task.params == 'row' %}
+                <table class="w-full text-center table-fixed">
+                    <thead>
+                        <tr>
+                            {% for column in user_task.task.columns.all %}
+                                <th class="border border-border-200 p-2 bg-secondary-100 font-semibold">{{ column.label }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            {% for column in user_task.task.columns.all %}
+                                <td class="border border-border-200 align-top min-h-[100px] p-2">
+                                    {% for answer in user_task.matching_answers.all %}
+                                        {% if answer.selected_column.id == column.id %}
+                                            <div class="rounded p-2 mb-2 text-white {% if answer.is_correct %}bg-primary-600{% else %}bg-destructive{% endif %}">
+                                                {{ answer.item.text|safe }}
+                                                {% if not answer.is_correct %}
+                                                    <div class="text-sm text-white mt-1 italic">Дұрысы: {{ answer.item.correct_column.label }}</div>
+                                                {% endif %}
+                                            </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                </td>
+                            {% endfor %}
+                        </tr>
+                    </tbody>
+                </table>
+            {% elif user_task.task.params == 'col' %}
+                <div class="grid border border-border-200">
+                    {% for column in user_task.task.columns.all %}
+                        <div class="flex">
+                            <div class="max-w-xs w-full p-4 bg-secondary-100 font-semibold border-b border-border-200">{{ column.label }}</div>
+
+                            <div class="dropzone flex-1 flex flex-col gap-2 p-2 border-b border-border-200" data-column-id="{{ column.id }}">
                                 {% for answer in user_task.matching_answers.all %}
                                     {% if answer.selected_column.id == column.id %}
                                         <div class="rounded p-2 mb-2 text-white {% if answer.is_correct %}bg-primary-600{% else %}bg-destructive{% endif %}">
@@ -45,47 +68,68 @@
                                         </div>
                                     {% endif %}
                                 {% endfor %}
-                            </td>
-                        {% endfor %}
-                    </tr>
-                </tbody>
-            </table>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
         </div>
     {% else %}
         <form method="post" id="matching-form" class="grid gap-8">
             {% csrf_token %}
 
-            <table class="w-full border text-center">
-                <thead>
-                    <tr>
-                        {% for column in user_task.task.columns.all %}
-                        <th class="border border-border-200 p-2 bg-secondary-100 font-semibold">{{ column.label }}</th>
-                        {% endfor %}
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        {% for column in user_task.task.columns.all %}
-                            <td class="border border-border-200 align-top min-h-[100px]">
-                                <div class="dropzone min-h-[120px] flex flex-col gap-2 p-2 rounded" data-column-id="{{ column.id }}">
-                                    {% for answer in user_task.matching_answers.all %}
-                                        {% if answer.selected_column.id == column.id %}
-                                            <div class="draggable item bg-primary-200 rounded p-1 mb-1 cursor-move" draggable="true" data-item-id="{{ answer.item.id }}">
-                                                {{ answer.item.text|safe }}
-                                                <input type="hidden" name="column_{{ answer.item.id }}" value="{{ column.id }}">
-                                            </div>
-                                        {% endif %}
-                                    {% endfor %}
-                                </div>
-                            </td>
-                        {% endfor %}
-                    </tr>
-                </tbody>
-            </table>
+            {% if user_task.task.params == 'row' %}
+                <table class="w-full border text-center table-fixed">
+                    <thead>
+                        <tr>
+                            {% for column in user_task.task.columns.all %}
+                                <th class="border border-border-200 p-4 bg-secondary-100 font-semibold">{{ column.label }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            {% for column in user_task.task.columns.all %}
+                                <td class="border border-border-200 align-top min-h-[100px]">
+                                    <div class="dropzone min-h-[120px] flex flex-col gap-2 p-2 rounded" data-column-id="{{ column.id }}">
+                                        {% for answer in user_task.matching_answers.all %}
+                                            {% if answer.selected_column.id == column.id %}
+                                                <div class="draggable item bg-primary-200 rounded p-1 mb-1 cursor-move" draggable="true" data-item-id="{{ answer.item.id }}">
+                                                    {{ answer.item.text|safe }}
+                                                    <input type="hidden" name="column_{{ answer.item.id }}" value="{{ column.id }}">
+                                                </div>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                </td>
+                            {% endfor %}
+                        </tr>
+                    </tbody>
+                </table>
+            {% elif user_task.task.params == 'col' %}
+                <div class="grid border border-border-200">
+                    {% for column in user_task.task.columns.all %}
+                        <div class="flex">
+                            <div class="max-w-xs w-full p-4 bg-secondary-100 font-semibold border-b border-border-200">{{ column.label }}</div>
+
+                            <div class="dropzone flex-1 flex flex-col gap-2 px-2 pt-2 pb-10 border-b border-border-200" data-column-id="{{ column.id }}">
+                                {% for answer in user_task.matching_answers.all %}
+                                    {% if answer.selected_column.id == column.id %}
+                                        <div class="draggable item bg-primary-200 rounded p-1 mb-1 cursor-move" draggable="true" data-item-id="{{ answer.item.id }}">
+                                            {{ answer.item.text|safe }}
+                                            <input type="hidden" name="column_{{ answer.item.id }}" value="{{ column.id }}">
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
 
             <div class="grid gap-4 text-left">
                 <h1 class="font-semibold">Сәйкестендіру керек жауаптар:</h1>
-                <div id="draggables" class="flex gap-3">
+                <div id="draggables" class="flex items-start gap-3">
                     {% for answer in user_task.matching_answers.all %}
                         {% if not answer.selected_column %}
                             <div class="draggable item bg-amber-200 rounded-lg py-2 px-4 cursor-move" draggable="true" data-item-id="{{ answer.item.id }}">
@@ -100,7 +144,7 @@
             <div class="flex justify-center">
                 <button 
                     type="submit"
-                    class="flex gap-2 justify-center items-center text-center cursor-pointer focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg px-5 py-2.5"
+                    class="flex gap-2 justify-center items-center text-center cursor-pointer focus:outline-none text-white bg-primary-600 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg px-5 py-2.5"
                 >
                     Толықтыруды аятау
                 </button>
