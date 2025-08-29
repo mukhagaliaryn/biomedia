@@ -43,7 +43,7 @@ class QuestionTab(SummernoteModelAdminMixin, admin.TabularInline):
 
 
 # Matching Tab
-class MatchingColumnTab(admin.TabularInline):
+class MatchingColumnTab(SummernoteModelAdminMixin, admin.TabularInline):
     model = MatchingColumn
     extra = 0
     readonly_fields = ('view_link', )
@@ -173,7 +173,7 @@ class MatchingItemTab(SummernoteModelAdminMixin, admin.TabularInline):
 
 # MatchingColumnAdmin
 @admin.register(MatchingColumn)
-class MatchingColumnAdmin(admin.ModelAdmin):
+class MatchingColumnAdmin(SummernoteModelAdmin):
     list_display = ('label', 'task', )
     inlines = (MatchingItemTab, )
     readonly_fields = ('task_link',)

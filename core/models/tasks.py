@@ -152,7 +152,7 @@ class MatchingColumn(models.Model):
         Task, related_name='columns',
         on_delete=models.CASCADE, verbose_name=_('Тапсырма')
     )
-    label = models.CharField(_('Атауы'), max_length=255)
+    label = models.TextField(_('Атауы'))
     order = models.PositiveIntegerField(_('Реттілігі'), default=0)
 
     def __str__(self):
