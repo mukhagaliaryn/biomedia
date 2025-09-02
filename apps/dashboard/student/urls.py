@@ -23,4 +23,9 @@ urlpatterns = [
         subject.lesson_finish_handler,
         name='lesson_finish_handler'
     ),
+    path(
+        'user/subject/<subject_id>/chapter/<chapter_id>/lesson/<lesson_id>/feedback/',
+        subject.feedback_handler,
+        name='feedback_handler'
+    ),
 ]

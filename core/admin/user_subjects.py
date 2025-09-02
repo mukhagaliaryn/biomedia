@@ -2,7 +2,9 @@ from django.contrib import admin
 from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
-from core.models import UserSubject, UserLesson, UserChapter, UserTask
+from django_summernote.admin import SummernoteModelAdminMixin
+
+from core.models import UserSubject, UserLesson, UserChapter, UserTask, Feedback
 
 
 # UserSubject admin
@@ -53,12 +55,18 @@ class UserTaskTab(admin.TabularInline):
     view_link.short_description = _('Қолданушының тапсырмасы')
 
 
+# Feedback Tab
+class FeedbackTab(SummernoteModelAdminMixin, admin.TabularInline):
+    model = Feedback
+    extra = 0
+
+
 @admin.register(UserLesson)
 class UserLessonAdmin(admin.ModelAdmin):
     list_display = ('user_subject', 'lesson', 'rating', 'percentage', 'is_completed', 'completed_at', )
     list_filter = ('user_subject', 'lesson', 'is_completed', )
     search_fields = ('user__username', 'lesson__title')
-    inlines = (UserTaskTab, )
+    inlines = (UserTaskTab, FeedbackTab, )
     readonly_fields = ('user_subject_link',)
 
     def user_subject_link(self, obj):

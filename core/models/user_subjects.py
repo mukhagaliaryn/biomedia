@@ -109,3 +109,22 @@ class UserLesson(models.Model):
             'minutes': minutes,
             'seconds': seconds,
         }
+
+
+# Feedback model
+# ----------------------------------------------------------------------------------------------------------------------
+class Feedback(models.Model):
+    user_lesson = models.ForeignKey(
+        UserLesson, on_delete=models.CASCADE,
+        related_name='feedbacks', verbose_name=_('Қолданушының сабағы')
+    )
+    rating = models.IntegerField(_('Бағасы'), choices=[(1, 'Өте нашар'), (2, 'Нашар'), (3, 'Орташа'), (4, 'Жақсы'), (5, 'Тамаша')])
+    comment = models.TextField(_('Пікір'), blank=True)
+    created_at = models.DateTimeField(_('Жазылған уақыты'), auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.user_lesson.user} - {self.user_lesson.lesson} - {self.rating}'
+
+    class Meta:
+        verbose_name = _('Кері байланыс')
+        verbose_name_plural = _('Кері байланыстар')

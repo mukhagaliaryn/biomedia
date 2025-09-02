@@ -6,7 +6,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from core.models import UserSubject, UserChapter, UserLesson, UserTask, UserVideo, UserWritten, UserTextGap, \
-    UserAnswer, Option, Task, UserMatchingAnswer, Lesson, UserTableAnswer
+    UserAnswer, Option, Task, UserMatchingAnswer, Lesson, UserTableAnswer, Feedback
 from core.utils.decorators import role_required
 
 
@@ -253,6 +253,34 @@ def lesson_finish_handler(request, subject_id, chapter_id, lesson_id):
     user_subject.save()
 
     messages.success(request, 'Сабақ сәтті аяқталды!')
+    return redirect('user_lesson', subject_id=subject_id, chapter_id=chapter_id, lesson_id=lesson_id)
+
+# Feedback handler
+# ----------------------------------------------------------------------------------------------------------------------
+@require_POST
+@login_required
+def feedback_handler(request, subject_id, chapter_id, lesson_id):
+    user_lesson = get_object_or_404(UserLesson, id=lesson_id, user=request.user)
+
+    rating = request.POST.get('rating')
+    comment = request.POST.get('comment', '')
+
+    if not rating:
+        return redirect('user_lesson', subject_id=subject_id, chapter_id=chapter_id, lesson_id=lesson_id)
+
+    feedback, created = Feedback.objects.get_or_create(
+        user_lesson=user_lesson,
+        defaults={
+            'rating': rating,
+            'comment': comment,
+        }
+    )
+
+    if not created:
+        feedback.rating = rating
+        feedback.comment = comment
+        feedback.save()
+
     return redirect('user_lesson', subject_id=subject_id, chapter_id=chapter_id, lesson_id=lesson_id)
 
 
