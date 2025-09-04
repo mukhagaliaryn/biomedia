@@ -215,3 +215,15 @@ class TableRow(models.Model):
         verbose_name = _('Кесте қатары')
         verbose_name_plural = _('Кесте қатарлары')
         ordering = ('order', )
+
+# TableCell
+class TableCell(models.Model):
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='table_cells', verbose_name='Тапсырма')
+    row = models.ForeignKey(TableRow, on_delete=models.CASCADE, related_name='correct_cells', verbose_name='Қатар')
+    column = models.ForeignKey(TableColumn, on_delete=models.CASCADE, related_name='correct_cells', verbose_name='Баған')
+    correct = models.BooleanField('Дұрыс жауап', default=False)
+
+    class Meta:
+        unique_together = ('task', 'row', 'column')
+        verbose_name = 'Кесте ұяшығы (дұрыс жауап)'
+        verbose_name_plural = 'Кесте ұяшықтары (дұрыс жауаптар)'

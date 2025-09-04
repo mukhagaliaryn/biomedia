@@ -524,15 +524,42 @@ def user_lesson_task_view(request, subject_id, chapter_id, lesson_id, task_id):
 
         # -------------- table --------------
         elif task_type == 'table':
-            for answer in user_task.user_table_answers.select_related('row', 'column'):
-                field_name = f'cell_{answer.row.id}_{answer.column.id}'
-                user_input = request.POST.get(field_name, '').strip()
+            total = 0
+            correct = 0
 
-                answer.answer = user_input
-                answer.is_submitted = bool(user_input)
+            correct_cells = {
+                (cell.row_id, cell.column_id): cell.correct
+                for cell in user_task.task.table_cells.all()
+            }
+
+            for answer in user_task.user_table_answers.all():
+                field_name = f'cell_{answer.row_id}_{answer.column_id}'
+                is_checked = field_name in request.POST
+
+                # Жауапты сақтау
+                answer.answer = '1' if is_checked else ''
+                answer.is_submitted = True
                 answer.save()
 
-            messages.success(request, 'Кесте тапсырмасы жіберілді')
+                # Бағалау
+                expected = correct_cells.get((answer.row_id, answer.column_id), False)
+                total += 1
+                if expected == is_checked:
+                    correct += 1
+
+            full_rating = user_task.task.rating
+            if correct == total:
+                score = full_rating
+            elif correct >= total * 0.5:
+                score = int(full_rating / 2)
+            else:
+                score = 0
+
+            user_task.rating = score
+            user_task.is_completed = True
+            user_task.save()
+
+            messages.success(request, f'Кесте тапсырмасы бағаланды: {score}/{full_rating}')
 
         return redirect(
             'user_lesson_task',

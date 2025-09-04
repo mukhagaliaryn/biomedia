@@ -176,6 +176,26 @@
                                 Статистика
                             </button>
                         </li>
+                        <li class="me-2" role="presentation">
+                            <button 
+                                class="inline-flex gap-1 p-4 border-b-2 rounded-t-lg" 
+                                id="feedback-tab" 
+                                data-tabs-target="#feedback"
+                                type="button" role="tab" 
+                                aria-controls="feedback" 
+                                aria-selected="false"
+                            >
+                                Кері байланыс
+
+                                <svg 
+                                    class="text-amber-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" 
+                                    width="18" height="18" fill="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        d="M13.849 4.22c-.684-1.626-3.014-1.626-3.698 0L8.397 8.387l-4.552.361c-1.775.14-2.495 2.331-1.142 3.477l3.468 2.937-1.06 4.392c-.413 1.713 1.472 3.067 2.992 2.149L12 19.35l3.897 2.354c1.52.918 3.405-.436 2.992-2.15l-1.06-4.39 3.468-2.938c1.353-1.146.633-3.336-1.142-3.477l-4.552-.36-1.754-4.17Z" />
+                                </svg>
+
+                            </button>
+                        </li>
                     {% endif %}
                     <li class="me-2" role="presentation">
                         <button 
@@ -270,6 +290,100 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Feedback -->
+                <div 
+                    class="hidden" 
+                    id="feedback" 
+                    role="tabpanel"
+                    aria-labelledby="feedback-tab"
+                >
+                    <div class="flex items-start justify-center gap-8 p-4 text-left">
+                        <div class="w-full grid gap-8">
+                            {% for feed in user_lesson.feedbacks.all %}
+                                <div class="flex items-start gap-2">
+                                    {% if user.avatar %}
+                                        <img 
+                                            class="w-8 h-8 rounded-full"
+                                            src="{{ user.avatar.url }}" alt="user photo"
+                                        >
+                                    {% else %}
+                                        <div 
+                                            class="w-8 h-8 rounded-full bg-secondary-100 flex items-center justify-center text-foreground"
+                                        >
+                                            {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
+                                        </div>
+                                    {% endif %}
+                                    <div class="flex flex-col gap-2 w-full leading-1.5 p-4 border-border-200 bg-border-100 rounded-e-xl rounded-es-xl text-left">
+                                        <div class="flex items-center space-x-2 rtl:space-x-reverse">
+                                            <span class="text-sm font-semibold">{{ feed.user_lesson.user.first_name }} {{ feed.user_lesson.user.last_name }}</span>
+                                            <span class="text-sm font-normal text-muted">{{ feed.created_at }}</span>
+                                        </div>
+                                        <div class="font-normal py-2.5">
+                                            {{ feed.comment|safe }}
+                                        </div>
+                                        <div class="flex gap-1 items-center">
+                                            {% for i in feed.rating|range_filter %}
+                                                <svg 
+                                                    class="text-amber-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="20"
+                                                    height="20" fill="currentColor" viewBox="0 0 24 24">
+                                                    <path
+                                                        d="M13.849 4.22c-.684-1.626-3.014-1.626-3.698 0L8.397 8.387l-4.552.361c-1.775.14-2.495 2.331-1.142 3.477l3.468 2.937-1.06 4.392c-.413 1.713 1.472 3.067 2.992 2.149L12 19.35l3.897 2.354c1.52.918 3.405-.436 2.992-2.15l-1.06-4.39 3.468-2.938c1.353-1.146.633-3.336-1.142-3.477l-4.552-.36-1.754-4.17Z" />
+                                                </svg>
+
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+
+                            <form 
+                                method="post" 
+                                action="{% url 'feedback_handler' user_subject.id user_chapter.id user_lesson.id %}"
+                                class="w-full grid gap-4"
+                            >   
+                                {% csrf_token %}
+                                <div class="grid gap-2 text-left">
+                                    <label for="rating" class="block font-medium">Бағалау (1-5):</label>
+                                    <select 
+                                        name="rating" 
+                                        id="rating" 
+                                        required
+                                        class="text-sm bg-secondary-50 border border-border-300 rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5"    
+                                    >
+                                        <option value="">Таңдаңыз</option>
+                                        <option value="1">1 - Өте нашар</option>
+                                        <option value="2">2 - Нашар</option>
+                                        <option value="3">3 - Қанағаттанарлық</option>
+                                        <option value="4">4 - Жақсы</option>
+                                        <option value="5">5 - Тамаша</option>
+                                    </select>
+                                </div>
+
+                                <div class="grid gap-2 text-left">
+                                    <label for="comment" class="block font-medium">Пікір:</label>
+                                    <textarea 
+                                        id="comment"
+                                        name="comment" 
+                                        rows="4" 
+                                        placeholder="Қосымша пікір..."
+                                        class="block text-sm p-2.5 w-full bg-secondary-50 rounded-lg border border-secondary-300 focus:ring-primary-500 focus:border-primary-500"    
+                                    ></textarea>
+                                </div>
+
+                                <div class="flex justify-center">
+                                    <button 
+                                        type="submit" 
+                                        class="flex gap-2 justify-center items-center text-center cursor-pointer focus:outline-none text-white bg-primary-600 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg px-5 py-2.5"
+                                    >
+                                        Жіберу
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                        
                     </div>
                 </div>
 

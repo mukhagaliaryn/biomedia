@@ -28,7 +28,7 @@
                     <thead>
                         <tr>
                             {% for column in user_task.task.columns.all %}
-                                <th class="border border-border-200 p-2 bg-secondary-100 font-semibold">{{ column.label }}</th>
+                                <th class="border border-border-200 p-2 bg-secondary-100 font-semibold">{{ column.label|safe }}</th>
                             {% endfor %}
                         </tr>
                     </thead>
@@ -38,10 +38,10 @@
                                 <td class="border border-border-200 align-top min-h-[100px] p-2">
                                     {% for answer in user_task.matching_answers.all %}
                                         {% if answer.selected_column.id == column.id %}
-                                            <div class="rounded p-2 mb-2 text-white {% if answer.is_correct %}bg-primary-600{% else %}bg-destructive{% endif %}">
+                                            <div class="rounded p-2 mb-2 text-left text-white {% if answer.is_correct %}bg-primary-600{% else %}bg-destructive{% endif %}">
                                                 {{ answer.item.text|safe }}
                                                 {% if not answer.is_correct %}
-                                                    <div class="text-sm text-white mt-1 italic">Дұрысы: {{ answer.item.correct_column.label }}</div>
+                                                    <div class="text-sm text-white mt-1 italic">Дұрысы: {{ answer.item.correct_column.label|safe }}</div>
                                                 {% endif %}
                                             </div>
                                         {% endif %}
@@ -55,12 +55,12 @@
                 <div class="grid border border-border-200">
                     {% for column in user_task.task.columns.all %}
                         <div class="flex">
-                            <div class="max-w-xs w-full p-4 bg-secondary-100 font-semibold border-b border-border-200">{{ column.label }}</div>
+                            <div class="max-w-xs w-full p-4 bg-secondary-100 font-semibold border-b border-border-200">{{ column.label|safe }}</div>
 
                             <div class="dropzone flex-1 flex flex-col gap-2 p-2 border-b border-border-200" data-column-id="{{ column.id }}">
                                 {% for answer in user_task.matching_answers.all %}
                                     {% if answer.selected_column.id == column.id %}
-                                        <div class="rounded p-2 mb-2 text-white {% if answer.is_correct %}bg-primary-600{% else %}bg-destructive{% endif %}">
+                                        <div class="rounded p-2 mb-2 text-white text-left {% if answer.is_correct %}bg-primary-600{% else %}bg-destructive{% endif %}">
                                             {{ answer.item.text|safe }}
                                             {% if not answer.is_correct %}
                                                 <div class="text-sm text-white mt-1 italic">Дұрысы: {{ answer.item.correct_column.label }}</div>
@@ -83,7 +83,7 @@
                     <thead>
                         <tr>
                             {% for column in user_task.task.columns.all %}
-                                <th class="border border-border-200 p-4 bg-secondary-100 font-semibold">{{ column.label }}</th>
+                                <th class="border border-border-200 p-4 bg-secondary-100 font-semibold">{{ column.label|safe }}</th>
                             {% endfor %}
                         </tr>
                     </thead>
@@ -91,7 +91,7 @@
                         <tr>
                             {% for column in user_task.task.columns.all %}
                                 <td class="border border-border-200 align-top min-h-[100px]">
-                                    <div class="dropzone min-h-[120px] flex flex-col gap-2 p-2 rounded" data-column-id="{{ column.id }}">
+                                    <div class="dropzone min-h-[120px] flex flex-col gap-2 p-2 text-left rounded" data-column-id="{{ column.id }}">
                                         {% for answer in user_task.matching_answers.all %}
                                             {% if answer.selected_column.id == column.id %}
                                                 <div class="draggable item bg-primary-200 rounded p-1 mb-1 cursor-move" draggable="true" data-item-id="{{ answer.item.id }}">
@@ -110,9 +110,9 @@
                 <div class="grid border border-border-200">
                     {% for column in user_task.task.columns.all %}
                         <div class="flex">
-                            <div class="max-w-xs w-full p-4 bg-secondary-100 font-semibold border-b border-border-200">{{ column.label }}</div>
+                            <div class="max-w-xs w-full p-4 bg-secondary-100 font-semibold border-b border-border-200">{{ column.label|safe }}</div>
 
-                            <div class="dropzone flex-1 flex flex-col gap-2 px-2 pt-2 pb-10 border-b border-border-200" data-column-id="{{ column.id }}">
+                            <div class="dropzone flex-1 flex flex-col gap-2 px-2 pt-2 pb-10 border-b border-border-200 text-left" data-column-id="{{ column.id }}">
                                 {% for answer in user_task.matching_answers.all %}
                                     {% if answer.selected_column.id == column.id %}
                                         <div class="draggable item bg-primary-200 rounded p-1 mb-1 cursor-move" draggable="true" data-item-id="{{ answer.item.id }}">
@@ -129,7 +129,7 @@
 
             <div class="grid gap-4 text-left">
                 <h1 class="font-semibold">Сәйкестендіру керек жауаптар:</h1>
-                <div id="draggables" class="flex items-start gap-3">
+                <div id="draggables" class="flex flex-wrap gap-2">
                     {% for answer in user_task.matching_answers.all %}
                         {% if not answer.selected_column %}
                             <div class="draggable item bg-amber-200 rounded-lg py-2 px-4 cursor-move" draggable="true" data-item-id="{{ answer.item.id }}">

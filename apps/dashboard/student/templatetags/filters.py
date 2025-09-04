@@ -52,3 +52,8 @@ def times10(value):
 @register.filter
 def has_submitted_answers(user_table_answers):
     return user_table_answers.filter(is_submitted=True).exists()
+
+
+@register.filter
+def range_filter(value):
+    return range(value)
