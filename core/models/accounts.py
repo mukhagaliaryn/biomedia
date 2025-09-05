@@ -10,8 +10,16 @@ class User(AbstractUser):
         ('teacher', _('Мұғалім')),
         ('admin', _('Администрация')),
     )
+
+    USER_CLASS = (
+        ('none', _('Сыныпты таңдау')),
+        ('8b', _('8Б сынып')),
+        ('8v', _('8В сынып')),
+    )
+
     avatar = models.ImageField(_('Сурет'), upload_to='core/account/users/', blank=True, null=True)
     user_type = models.CharField(_('Қолданушы типі'), max_length=32, choices=USER_TYPE, default='student')
+    user_class = models.CharField(_('Сыныбы'), max_length=32, choices=USER_CLASS, default='none')
 
     def __str__(self):
         return f'{self.first_name} {self.last_name}'

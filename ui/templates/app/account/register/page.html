@@ -91,6 +91,25 @@
             </div>
 
             <div>
+                <label for="{{ form.user_class.id_for_label }}" class="block mb-2 text-sm font-medium">
+                    Сыныбы
+                </label>
+                <select 
+                    name="user_class"
+                    class="block w-full p-2.5 border border-border-300 text-foreground text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600"
+                >
+                    <option value="none" selected>Сыныпты таңдау</option>
+                    <option value="8b">8Б сынып</option>
+                    <option value="8v">8В сынып</option>
+                </select>
+                {% if form.user_class.errors %}
+                    {% for error in form.user_class.errors %}
+                        <p class="text-sm text-destructive">{{ error }}</p>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            <div>
                 <label for="{{ form.password1.id_for_label }}" class="block mb-2 text-sm font-medium">
                     Пароль
                 </label>

@@ -12,7 +12,7 @@ class UserAdmin(UserModelAdmin):
     ordering = ('email',)
 
     fieldsets = (
-        (None, {'fields': ('avatar', 'username', 'email', 'first_name', 'last_name', 'user_type', 'password')}),
+        (None, {'fields': ('avatar', 'username', 'email', 'first_name', 'last_name', 'user_type', 'user_class', 'password')}),
         ('Permissions', {'fields': ('is_staff', 'is_active', 'is_superuser', 'user_permissions')}),
         ('Important dates', {'fields': ('last_login',)}),
     )
@@ -20,7 +20,7 @@ class UserAdmin(UserModelAdmin):
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('username', 'email', 'first_name', 'last_name', 'password1', 'password2',)}
+            'fields': ('username', 'email', 'first_name', 'last_name', 'user_class', 'password1', 'password2',)}
         ),
     )
 
