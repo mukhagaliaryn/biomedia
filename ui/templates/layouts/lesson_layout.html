@@ -4,7 +4,7 @@
 
 
 {% block base_layout %}
-<div class="flex items-start p-8 gap-8">
+<div class="grid lg:flex items-start p-8 gap-8">
     <div class="flex-1">
         {% block lesson_layout %}
         {% endblock lesson_layout %}
@@ -15,7 +15,7 @@
         data-accordion="collapse" 
         data-active-classes="text-foreground"
         data-inactive-classes="text-muted"
-        class="max-w-md w-full border border-border-200 rounded-xl overflow-hidden"
+        class="w-full lg:max-w-md border border-border-200 rounded-xl overflow-hidden"
     >
         {% for uc in user_chapters %}
             <h2 id="accordion-collapse-heading-{{ uc.id }}">

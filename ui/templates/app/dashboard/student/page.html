@@ -97,8 +97,8 @@
                                     href="{% url 'user_lesson' item.user_subject.id item.first_chapter.id item.first_lesson.id %}"
                                     class="flex-1 grid gap-4"
                                 >
-                                    <div class="flex items-start gap-4 p-4 lg:border-r border-border-200 hover:bg-secondary-50">
-                                        <div class="max-w-xs w-full rounded-lg overflow-hidden">
+                                    <div class="grid md:flex items-start gap-4 p-4 lg:border-r border-border-200 hover:bg-secondary-50">
+                                        <div class="w-full md:max-w-xs rounded-lg overflow-hidden">
                                             {% if item.subject.poster %}
                                                 <img
                                                     src="{{ item.subject.poster.url }}"
