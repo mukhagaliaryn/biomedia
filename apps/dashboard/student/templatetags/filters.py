@@ -57,3 +57,8 @@ def has_submitted_answers(user_table_answers):
 @register.filter
 def range_filter(value):
     return range(value)
+
+
+@register.simple_tag
+def set(val=None):
+    return val

@@ -187,11 +187,11 @@ class TableColumn(models.Model):
         Task, on_delete=models.CASCADE,
         related_name='table_columns', verbose_name=_('Тапсырма')
     )
-    label = models.CharField(_('Баған атауы'), max_length=255)
+    label = models.TextField(_('Баған атауы'))
     order = models.PositiveIntegerField(_('Реттілік нөмері'), default=0)
 
     def __str__(self):
-        return f'Баған: {self.label}'
+        return f'Баған: {self.pk}'
 
     class Meta:
         verbose_name = _('Кесте бағаны')
@@ -205,11 +205,11 @@ class TableRow(models.Model):
         Task, on_delete=models.CASCADE,
         related_name='table_rows', verbose_name=_('Тапсырма')
     )
-    label = models.CharField(_('Қатар атауы'), max_length=255)
+    label = models.TextField(_('Қатар атауы'))
     order = models.PositiveIntegerField(_('Реттілік нөмері'), default=0)
 
     def __str__(self):
-        return f'Қатар: {self.label}'
+        return f'Қатар: {self.pk}'
 
     class Meta:
         verbose_name = _('Кесте қатары')
@@ -218,12 +218,10 @@ class TableRow(models.Model):
 
 # TableCell
 class TableCell(models.Model):
-    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='table_cells', verbose_name='Тапсырма')
     row = models.ForeignKey(TableRow, on_delete=models.CASCADE, related_name='correct_cells', verbose_name='Қатар')
     column = models.ForeignKey(TableColumn, on_delete=models.CASCADE, related_name='correct_cells', verbose_name='Баған')
     correct = models.BooleanField('Дұрыс жауап', default=False)
 
     class Meta:
-        unique_together = ('task', 'row', 'column')
         verbose_name = 'Кесте ұяшығы (дұрыс жауап)'
         verbose_name_plural = 'Кесте ұяшықтары (дұрыс жауаптар)'

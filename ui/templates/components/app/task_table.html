@@ -6,41 +6,22 @@
         {% if user_task.is_completed %}
             <div class="flex justify-between">
                 <div class="flex items-center gap-2 bg-secondary-100 font-medium py-2 px-4 rounded-xl">
-                    <svg class="w-5 h-5 text-amber-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24"
-                        height="24" fill="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-5 h-5 text-amber-500" fill="currentColor" viewBox="0 0 24 24">
                         <path
                             d="M13.849 4.22c-.684-1.626-3.014-1.626-3.698 0L8.397 8.387l-4.552.361c-1.775.14-2.495 2.331-1.142 3.477l3.468 2.937-1.06 4.392c-.413 1.713 1.472 3.067 2.992 2.149L12 19.35l3.897 2.354c1.52.918 3.405-.436 2.992-2.15l-1.06-4.39 3.468-2.938c1.353-1.146.633-3.336-1.142-3.477l-4.552-.36-1.754-4.17Z" />
                     </svg>
-                    <span>{{ user_task.task.rating }}/{{ user_task.rating }} балл</span>
+                    <span>{{ user_task.rating }}/{{ user_task.task.rating }} балл</span>
                 </div>
-
+            
+            
                 <div class="flex gap-1 items-center font-medium px-4 py-2 rounded-xl bg-primary-100 text-primary-600">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
-                        class="lucide lucide-circle-check-icon lucide-circle-check">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+                        class="lucide lucide-circle-check">
                         <circle cx="12" cy="12" r="10" />
                         <path d="m9 12 2 2 4-4" />
                     </svg>
                     <span>Орындалды</span>
-                </div>
-            </div>
-        {% else %}
-            <div class="flex justify-between">
-                <div class="flex items-center gap-2 bg-secondary-100 font-medium py-2 px-4 rounded-xl">
-                    <svg class="w-5 h-5 text-amber-500" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                        fill="currentColor" viewBox="0 0 24 24">
-                        <path
-                            d="M13.849 4.22c-.684-1.626-3.014-1.626-3.698 0L8.397 8.387l-4.552.361c-1.775.14-2.495 2.331-1.142 3.477l3.468 2.937-1.06 4.392c-.413 1.713 1.472 3.067 2.992 2.149L12 19.35l3.897 2.354c1.52.918 3.405-.436 2.992-2.15l-1.06-4.39 3.468-2.938c1.353-1.146.633-3.336-1.142-3.477l-4.552-.36-1.754-4.17Z" />
-                    </svg>
-                    <span>{{ user_task.task.rating }} балл</span>
-                </div>
-
-                <div class="flex items-center gap-2 bg-secondary-100 font-medium py-2 px-4 rounded-xl">
-                    <svg class="w-5 h-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none"
-                        viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2m6-2a10 10 0 11-20 0 10 10 0 0120 0z" />
-                    </svg>
-                    <span>~ {{ user_task.task.duration }}:00</span>
                 </div>
             </div>
         {% endif %}
@@ -53,65 +34,53 @@
                         <tr>
                             <th class="border border-secondary-300 px-4 py-2 text-left">Қатар / Баған</th>
                             {% for column in table_columns %}
-                                <th class="border border-secondary-300 px-4 py-2 text-center">{{ column.label }}</th>
+                            <th class="border border-secondary-300 px-4 py-2 text-center">{{ column.label|safe }}</th>
                             {% endfor %}
                         </tr>
                     </thead>
                     <tbody>
                         {% for row in table_rows %}
-                            <tr>
-                                <td class="border border-secondary-300 px-4 py-2 font-medium bg-secondary-50">{{ row.label }}</td>
-                                {% for column in table_columns %}
-                                    {% with answer=answer_matrix|get_item:row.id|get_item:column.id %}
-                                        <td class="border border-gray-300">
-                                            <input 
-                                                type="text" 
-                                                name="cell_{{ row.id }}_{{ column.id }}"
-                                                value="{{ answer.answer|default:'' }}"
-                                                {% if user_task.is_completed %}readonly{% endif %}
-                                                class="w-full h-full px-3 py-2 border-none focus:outline-none
-                                                       {% if user_task.is_completed %}
-                                                           bg-gray-100 text-gray-500 cursor-not-allowed
-                                                       {% else %}
-                                                           focus:ring-2 focus:ring-blue-500
-                                                       {% endif %}"
-                                                required
-                                            />
-                                        </td>
-                                    {% endwith %}
-                                {% endfor %}
-                            </tr>
+                        <tr>
+                            <td class="border border-secondary-300 px-4 py-2 font-medium bg-secondary-50">{{ row.label|safe }}</td>
+                            {% for column in table_columns %}
+                            {% with answer=answer_matrix|get_item:row.id|get_item:column.id %}
+                            {% with correct=correct_matrix|get_item:row.id|get_item:column.id %}
+                            <td class="border border-gray-300 text-center 
+                                {% if user_task.is_completed %}
+                                    {% if answer.checked and correct %}
+                                        bg-green-100
+                                    {% elif answer.checked and not correct %}
+                                        bg-red-100
+                                    {% elif not answer.checked and correct %}
+                                        bg-yellow-100
+                                    {% endif %}
+                                {% endif %}"
+                            >
+                                <input 
+                                    type="checkbox" 
+                                    name="cell_{{ row.id }}_{{ column.id }}" 
+                                    {% if user_task.is_completed %}disabled{% endif %}
+                                    {% if answer.checked %}checked{% endif %} class="w-5 h-5" />
+                            </td>
+                            {% endwith %}
+                            {% endwith %}
+                            {% endfor %}
+                        </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
 
-            {% if not user_task.is_completed and not user_task.user_table_answers|has_submitted_answers %}
+            {% if not user_task.is_completed %}
                 <div class="flex justify-center">
-                    <button
-                        type="submit"
-                        class="flex gap-2 justify-center items-center text-center cursor-pointer focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg px-5 py-2.5"
-                    >
+                    <button type="submit"
+                        class="flex gap-2 justify-center items-center text-center cursor-pointer focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg px-5 py-2.5">
                         Тапсырманы жіберу
                     </button>
                 </div>
             {% endif %}
         </form>
 
-        {% if not user_task.is_completed and user_task.user_table_answers|has_submitted_answers %}
-            <div class="grid gap-2 text-primary-700">
-                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                    stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
-                    class="lucide lucide-clock-fading-icon lucide-clock-fading mx-auto">
-                    <path d="M12 2a10 10 0 0 1 7.38 16.75" />
-                    <path d="M12 6v6l4 2" />
-                    <path d="M2.5 8.875a10 10 0 0 0-.5 3" />
-                    <path d="M2.83 16a10 10 0 0 0 2.43 3.4" />
-                    <path d="M4.636 5.235a10 10 0 0 1 .891-.857" />
-                    <path d="M8.644 21.42a10 10 0 0 0 7.631-.38" />
-                </svg>
-                <span>Оқытушының бағалауын күту</span>
-            </div>
-        {% endif %}
+
     </div>
 </div>

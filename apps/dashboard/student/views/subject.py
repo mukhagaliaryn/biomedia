@@ -6,7 +6,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from core.models import UserSubject, UserChapter, UserLesson, UserTask, UserVideo, UserWritten, UserTextGap, \
-    UserAnswer, Option, Task, UserMatchingAnswer, Lesson, UserTableAnswer, Feedback
+    UserAnswer, Option, Task, UserMatchingAnswer, Lesson, UserTableAnswer, Feedback, TableCell
 from core.utils.decorators import role_required
 
 
@@ -334,14 +334,26 @@ def user_lesson_task_view(request, subject_id, chapter_id, lesson_id, task_id):
         columns = user_task.task.table_columns.order_by('order')
         answers = user_task.user_table_answers.select_related('row', 'column')
 
+        # 1. Қолданушы жауаптары
         answer_matrix = {row.id: {} for row in rows}
-
         for answer in answers:
             answer_matrix[answer.row.id][answer.column.id] = answer
 
+        # 2. Дұрыс жауаптар
+        correct_cells = TableCell.objects.filter(
+            row__task=user_task.task,
+            column__task=user_task.task
+        )
+
+        correct_matrix = {row.id: {} for row in rows}
+        for cell in correct_cells:
+            correct_matrix[cell.row_id][cell.column_id] = cell.correct
+
+        # 3. Контекстке жіберу
         related_data['table_rows'] = rows
         related_data['table_columns'] = columns
         related_data['answer_matrix'] = answer_matrix
+        related_data['correct_matrix'] = correct_matrix
 
     all_tasks_completed = not user_tasks.exclude(is_completed=True).exists()
 
@@ -527,39 +539,44 @@ def user_lesson_task_view(request, subject_id, chapter_id, lesson_id, task_id):
             total = 0
             correct = 0
 
-            correct_cells = {
-                (cell.row_id, cell.column_id): cell.correct
-                for cell in user_task.task.table_cells.all()
+            # 1. Дұрыс жауаптар картасы
+            correct_map = {
+                (c.row_id, c.column_id): c.correct
+                for c in TableCell.objects.filter(
+                    row__task=user_task.task,
+                    column__task=user_task.task
+                )
             }
 
+            # 2. Қолданушы жауаптарын қабылдау және сақтау
             for answer in user_task.user_table_answers.all():
                 field_name = f'cell_{answer.row_id}_{answer.column_id}'
-                is_checked = field_name in request.POST
+                is_checked = request.POST.get(field_name) == 'on'
 
-                # Жауапты сақтау
-                answer.answer = '1' if is_checked else ''
+                answer.checked = is_checked
                 answer.is_submitted = True
                 answer.save()
 
-                # Бағалау
-                expected = correct_cells.get((answer.row_id, answer.column_id), False)
-                total += 1
+                # 3. Бағалау үшін салыстыру
+                expected = correct_map.get((answer.row_id, answer.column_id), False)
                 if expected == is_checked:
                     correct += 1
+                total += 1
 
-            full_rating = user_task.task.rating
+            # 4. Ұпай есептеу
+            rating = user_task.task.rating or 1
             if correct == total:
-                score = full_rating
+                score = rating
             elif correct >= total * 0.5:
-                score = int(full_rating / 2)
+                score = int(rating / 2)
             else:
                 score = 0
 
             user_task.rating = score
             user_task.is_completed = True
-            user_task.save()
+            user_task.save(update_fields=['rating', 'is_completed'])
 
-            messages.success(request, f'Кесте тапсырмасы бағаланды: {score}/{full_rating}')
+            messages.success(request, 'Кесте толтыру тапсырмасы аяқталды')
 
         return redirect(
             'user_lesson_task',

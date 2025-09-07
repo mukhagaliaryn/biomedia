@@ -143,8 +143,7 @@ class UserTableAnswer(models.Model):
         'core.TableColumn', on_delete=models.CASCADE,
         related_name='user_answers', verbose_name=_('Баған')
     )
-    answer = models.TextField(_('Қолданушы жауабы'), max_length=255, blank=True, null=True)
-    is_submitted = models.BooleanField(_('Жіберілді'), default=False)
+    checked = models.BooleanField(_('Белгіленген'), default=False)
 
     class Meta:
         verbose_name = _('Кесте ұяшығына жауап')

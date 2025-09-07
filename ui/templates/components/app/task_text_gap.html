@@ -33,6 +33,7 @@
                     <div id="answer-{{ tg.id }}" class="hidden">
                         {{ tg.answer }}
                     </div>
+                    <input type="hidden" id="correct-answer-{{ tg.id }}" value="{{ tg.text_gap.correct_answer|lower }}">
 
                     <!-- 3. Rendered нәтиже -->
                     <div id="rendered-{{ tg.id }}" class="text-base text-justify text-muted-foreground mb-4"></div>
@@ -46,12 +47,24 @@
                             const id = promptEl.id.replace('prompt-', '');
                             const answerEl = document.getElementById(`answer-${id}`);
                             const resultEl = document.getElementById(`rendered-${id}`);
-
-                            if (promptEl && answerEl && resultEl) {
+                            const correctInputEl = document.getElementById(`correct-answer-${id}`);
+                            
+                            if (promptEl && answerEl && resultEl && correctInputEl) {
                                 const prompt = promptEl.innerText.trim();
                                 const answer = answerEl.innerText.trim();
+                                const correctAnswer = correctInputEl.value.trim().toLowerCase();
 
-                                const filled = prompt.replace('...', `<strong class="bg-primary-100 text-primary-600">${answer}</strong>`);
+                                let filled = "";
+
+                                if (answer.toLowerCase() === correctAnswer) {
+                                    filled = prompt.replace('...', `<strong class="bg-green-100 text-green-700 px-1 rounded">${answer}</strong>`);
+                                } else {
+                                    filled = prompt.replace('...', `
+                                        <del class="bg-red-100 text-red-600 px-1 rounded">${answer}</del> 
+                                        <span class="text-sm italic text-gray-500"> (Дұрысы: 
+                                            <strong class="bg-green-100 text-green-700 px-1 rounded">${correctAnswer}</strong>)
+                                        </span>`);
+                                }
 
                                 resultEl.innerHTML = filled;
                             }

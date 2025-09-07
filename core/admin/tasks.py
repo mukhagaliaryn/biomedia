@@ -3,7 +3,7 @@ from django.urls import reverse
 from django.utils.html import format_html
 from django_summernote.admin import SummernoteModelAdmin, SummernoteModelAdminMixin
 from core.models import Task, Question, Option, Written, TextGap, Video, MatchingColumn, MatchingItem, TableColumn, \
-    TableRow
+    TableRow, TableCell
 
 
 # Task admin
@@ -58,7 +58,7 @@ class MatchingColumnTab(SummernoteModelAdminMixin, admin.TabularInline):
 
 
 # TableColumnTab
-class TableColumnTab(admin.TabularInline):
+class TableColumnTab(SummernoteModelAdminMixin, admin.TabularInline):
     model = TableColumn
     extra = 0
     readonly_fields = ('view_link', )
@@ -66,14 +66,14 @@ class TableColumnTab(admin.TabularInline):
     def view_link(self, obj):
         if obj.pk:
             url = reverse('admin:core_tablecolumn_change', args=[obj.pk])
-            return format_html('<a href="{}" class="view-link">🔗 {}</a>', url, obj.label)
+            return format_html('<a href="{}" class="view-link">Толығырақ</a>', url)
         return '-'
 
     view_link.short_description = 'Бағанға сілтеме'
 
 
 # TableRowTab
-class TableRowTab(admin.TabularInline):
+class TableRowTab(SummernoteModelAdminMixin, admin.TabularInline):
     model = TableRow
     extra = 0
     readonly_fields = ('view_link', )
@@ -81,7 +81,7 @@ class TableRowTab(admin.TabularInline):
     def view_link(self, obj):
         if obj.pk:
             url = reverse('admin:core_tablerow_change', args=[obj.pk])
-            return format_html('<a href="{}" class="view-link">🔗 {}</a>', url, obj.label)
+            return format_html('<a href="{}" class="view-link">Толығырақ</a>', url)
         return '-'
 
     view_link.short_description = 'Қатарға сілтеме'
@@ -189,11 +189,35 @@ class MatchingColumnAdmin(SummernoteModelAdmin):
 
 # Task type:Table admin
 # ----------------------------------------------------------------------------------------------------------------------
+class TableCellTab(admin.TabularInline):
+    model = TableCell
+    extra = 0
+
+    def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
+        field = super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+        obj = getattr(self, 'parent_object', None)
+
+        if obj:
+            if db_field.name == 'row':
+                field.queryset = TableRow.objects.filter(task=obj.task)
+            elif db_field.name == 'column':
+                field.queryset = TableColumn.objects.filter(task=obj.task)
+
+        return field
+
+    def get_formset(self, request, obj=None, **kwargs):
+        # parent_object-ті formfield үшін сақтап қоямыз
+        self.parent_object = obj
+        return super().get_formset(request, obj, **kwargs)
+
+
 # TableColumnAdmin
 @admin.register(TableColumn)
-class TableColumnAdmin(admin.ModelAdmin):
+class TableColumnAdmin(SummernoteModelAdmin):
     list_display = ('label', 'task', )
     readonly_fields = ('task_link', )
+    inlines = (TableCellTab, )
 
     def task_link(self, obj):
         if obj.task:
@@ -206,9 +230,10 @@ class TableColumnAdmin(admin.ModelAdmin):
 
 # TableRowAdmin
 @admin.register(TableRow)
-class TableRowAdmin(admin.ModelAdmin):
+class TableRowAdmin(SummernoteModelAdmin):
     list_display = ('label', 'task', )
     readonly_fields = ('task_link', )
+    inlines = (TableCellTab, )
 
     def task_link(self, obj):
         if obj.task:
