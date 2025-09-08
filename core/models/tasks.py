@@ -191,7 +191,7 @@ class TableColumn(models.Model):
     order = models.PositiveIntegerField(_('Реттілік нөмері'), default=0)
 
     def __str__(self):
-        return f'Баған: {self.pk}'
+        return f'Баған: {self.label}'
 
     class Meta:
         verbose_name = _('Кесте бағаны')
@@ -209,7 +209,7 @@ class TableRow(models.Model):
     order = models.PositiveIntegerField(_('Реттілік нөмері'), default=0)
 
     def __str__(self):
-        return f'Қатар: {self.pk}'
+        return f'Қатар: {self.label}'
 
     class Meta:
         verbose_name = _('Кесте қатары')
