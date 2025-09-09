@@ -6,7 +6,7 @@
 
 {% block base_layout %}
 <div class="max-w-screen-xl mx-auto grid gap-8 py-6 px-4">
-    <!-- Student full name -->
+    <!-- User full name -->
     <div class="text-center grid gap-2">
         {% if user.avatar %}
             <img 
@@ -24,11 +24,14 @@
         <h1 class="text-2xl font-medium" role="none">
             👋, {{ user.first_name }} {{ user.last_name }}
         </h1>
-        <div class="flex justify-center">
-            <span class="flex items-center gap-1 bg-primary-100 text-primary-600 font-medium px-2.5 py-0.5 rounded-xl">
-                <div class="w-2 h-2 rounded-full bg-primary-600"></div>
-                {{ user.get_user_type_display }}
-            </span>
+        <div class="grid gap-1">
+            <span class="text-muted font-medium">{{ user.get_user_class_display }}</span>
+            <div class="flex justify-center">
+                <div class="flex items-center gap-1 bg-primary-100 text-primary-600 font-medium px-2.5 py-0.5 rounded-xl">
+                    <div class="w-2 h-2 rounded-full bg-primary-600"></div>
+                    {{ user.get_user_type_display }}
+                </div>
+            </div>
         </div>
     </div>
 
