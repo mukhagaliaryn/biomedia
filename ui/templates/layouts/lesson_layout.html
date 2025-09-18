@@ -91,6 +91,9 @@
                                                 <path d="M21 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3" />
                                                 <path d="m7 21 5-5 5 5" />
                                             </svg>
+                                            <div class="grid flex-1">
+                                                <h1 class="font-medium line-clamp-1">{{ uc.chapter.order }}.{{ forloop.counter }}-сабақ: {{ ul.lesson.title }}</h1>
+                                            </div>
                                         {% else %}
                                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                                 stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
@@ -102,11 +105,10 @@
                                                 <path d="M14 15h7" />
                                                 <path d="M14 20h7" />
                                             </svg>
+                                            <div class="grid flex-1">
+                                                <h1 class="font-medium line-clamp-1">{{ ul.lesson.title }}</h1>
+                                            </div>
                                         {% endif %}
-
-                                        <div class="grid flex-1">
-                                            <h1 class="font-medium line-clamp-1">{{ ul.lesson.title }}</h1>
-                                        </div>
                                     </div>
 
                                     <div class="flex gap-1 items-center">
@@ -130,7 +132,11 @@
                                         </svg>
 
                                         <div class="grid flex-1">
-                                            <h1 class="font-medium line-clamp-1">{{ ul.lesson.title }}</h1>
+                                            {% if ul.lesson.lesson_type == 'lesson' %}
+                                                <h1 class="font-medium line-clamp-1">{{ uc.chapter.order }}.{{ forloop.counter }}-сабақ: {{ ul.lesson.title }}</h1>
+                                            {% else %}
+                                                <h1 class="font-medium line-clamp-1">{{ ul.lesson.title }}</h1>
+                                            {% endif %}
                                         </div>
                                     </div>
 

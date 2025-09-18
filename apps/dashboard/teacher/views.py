@@ -1,17 +1,17 @@
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.db.models.aggregates import Avg
-from django.http import HttpResponse
 from django.shortcuts import render
 
 from core.models import Subject, UserSubject, UserChapter, UserLesson, User
 from core.utils.decorators import role_required
 
 
+# Teacher dashboard page
+# ----------------------------------------------------------------------------------------------------------------------
 @login_required
 @role_required('teacher')
 def teacher_view(request):
-    user = request.user
     subjects_data = []
 
     for subject in Subject.objects.all():
@@ -30,21 +30,23 @@ def teacher_view(request):
             avg_rating=Avg('rating'),
             avg_percentage=Avg('percentage')
         )
+
+        def safe_round(value, digits=0):
+            return round(value, digits) if value is not None else 0
+
         subjects_data.append({
             'subject': subject,
             'student_count': student_count,
 
             # UserSubject
-            'subject_avg_rating': round(subject_avg['avg_rating']) or 0,
-            'subject_avg_percentage': round(subject_avg['avg_percentage'], 2) or 0,
+            'subject_avg_rating': safe_round(subject_avg['avg_rating']),
+            'subject_avg_percentage': safe_round(subject_avg['avg_percentage'], 2),
 
-            # UserChapter
-            'chapter_avg_rating': round(chapter_stats['avg_rating']) or 0,
-            'chapter_avg_percentage': round(chapter_stats['avg_percentage'], 2) or 0,
+            'chapter_avg_rating': safe_round(chapter_stats['avg_rating']),
+            'chapter_avg_percentage': safe_round(chapter_stats['avg_percentage'], 2),
 
-            # UserLesson
-            'lesson_avg_rating': round(lesson_stats['avg_rating']) or 0,
-            'lesson_avg_percentage': round(lesson_stats['avg_percentage'], 2) or 0,
+            'lesson_avg_rating': safe_round(lesson_stats['avg_rating']),
+            'lesson_avg_percentage': safe_round(lesson_stats['avg_percentage'], 2),
         })
 
     # Барлық оқушылар
