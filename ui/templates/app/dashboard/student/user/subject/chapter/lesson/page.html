@@ -119,6 +119,11 @@
                     disabled
                     class="flex gap-2 justify-center items-center text-center cursor-pointer focus:outline-none bg-secondary-100 hover:bg-secondary-200 focus:ring-4 focus:ring-secondary-300 font-medium rounded-lg px-5 py-2.5"
                 >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye-icon lucide-eye">
+                        <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" />
+                        <circle cx="12" cy="12" r="3" />
+                    </svg>
                     <span class="hidden sm:block">Сабаққа кіру</span>
                 </a>
             {% elif user_lesson.status == 'finished' %}
@@ -157,7 +162,7 @@
             <!-- Tab trigger -->
             <div class="mb-4 border-b border-border-200">
                 <ul 
-                    class="flex -mb-px text-sm font-medium text-center max-w-md md:max-w-full overflow-hidden overflow-x-scroll md:overflow-auto" 
+                    class="flex -mb-px text-sm font-medium text-center max-w-[340px] md:max-w-full overflow-hidden overflow-x-scroll md:overflow-auto" 
                     id="lesson-tab"
                     data-tabs-toggle="#lesson-tab-content" 
                     role="tablist"
