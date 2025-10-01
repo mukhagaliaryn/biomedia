@@ -31,8 +31,8 @@ def teacher_view(request):
             avg_percentage=Avg('percentage')
         )
 
-        def safe_round(value, digits=0):
-            return round(value, digits) if value is not None else 0
+        def safe_round(value):
+            return round(value) if value is not None else 0
 
         subjects_data.append({
             'subject': subject,
@@ -40,13 +40,13 @@ def teacher_view(request):
 
             # UserSubject
             'subject_avg_rating': safe_round(subject_avg['avg_rating']),
-            'subject_avg_percentage': safe_round(subject_avg['avg_percentage'], 2),
+            'subject_avg_percentage': safe_round(subject_avg['avg_percentage']),
 
             'chapter_avg_rating': safe_round(chapter_stats['avg_rating']),
-            'chapter_avg_percentage': safe_round(chapter_stats['avg_percentage'], 2),
+            'chapter_avg_percentage': safe_round(chapter_stats['avg_percentage']),
 
             'lesson_avg_rating': safe_round(lesson_stats['avg_rating']),
-            'lesson_avg_percentage': safe_round(lesson_stats['avg_percentage'], 2),
+            'lesson_avg_percentage': safe_round(lesson_stats['avg_percentage']),
         })
 
     # Барлық оқушылар
@@ -85,13 +85,13 @@ def teacher_view(request):
         students_data.append({
             'user': user,
             'subject_avg_rating': round(subject_stats['avg_rating']) or 0,
-            'subject_avg_percentage': round(subject_stats['avg_percentage'], 2) or 0,
+            'subject_avg_percentage': round(subject_stats['avg_percentage']) or 0,
 
             'chapter_avg_rating': round(chapter_stats['avg_rating']) or 0,
-            'chapter_avg_percentage': round(chapter_stats['avg_percentage'], 2) or 0,
+            'chapter_avg_percentage': round(chapter_stats['avg_percentage']) or 0,
 
             'lesson_avg_rating': round(lesson_stats['avg_rating']) or 0,
-            'lesson_avg_percentage': round(lesson_stats['avg_percentage'], 2) or 0,
+            'lesson_avg_percentage': round(lesson_stats['avg_percentage']) or 0,
         })
 
     context = {
