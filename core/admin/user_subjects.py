@@ -35,7 +35,7 @@ class UserLessonTab(admin.StackedInline):
 class UserSubjectAdmin(admin.ModelAdmin):
     list_display = ('user', 'subject', 'rating', 'percentage', 'created_at', 'is_completed', )
     list_filter = ('user', 'subject', 'is_completed', )
-    search_fields = ('user__username', 'subject__title')
+    search_fields = ('user__first_name', 'user__last_name', 'subject__name')
     inlines = (UserChapterTab, UserLessonTab, )
 
 

@@ -171,7 +171,7 @@
                                             </div>
 
                                             <div class="grid gap-2">
-                                                <div>
+                                                <div class="flex gap-1">
                                                     <div class="inline-flex items-center gap-2 bg-secondary-100 font-medium py-2 px-4 rounded-xl">
                                                         <svg class="w-5 h-5 text-amber-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24"
                                                             height="24" fill="currentColor" viewBox="0 0 24 24">
@@ -180,6 +180,21 @@
                                                         </svg>
                                                         <span>{{ item.user_subject.rating }} балл</span>
                                                     </div>
+
+                                                    {% for ul in item.quarter_lessons %}
+                                                        <div class="inline-flex items-center gap-2 bg-secondary-100 font-medium p-2 rounded-xl">
+                                                            <div class="flex items-center gap-1">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                                    stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+                                                                    class="lucide lucide-flag-triangle-right-icon lucide-flag-triangle-right">
+                                                                    <path d="M6 22V2.8a.8.8 0 0 1 1.17-.71l11.38 5.69a.8.8 0 0 1 0 1.44L6 15.5" />
+                                                                </svg>
+                                                                <span>{{ ul.percentage|floatformat:0 }}%</span>
+                                                            </div>
+                                                        </div>
+                                                    {% empty %}
+                                                        <span class="text-muted">Бұл пәнге тоқсандық сабақтар қосылмаған</span>
+                                                    {% endfor %}
                                                 </div>
                                                 
                                                 <div class="w-full bg-secondary-200 rounded-full overflow-hidden">

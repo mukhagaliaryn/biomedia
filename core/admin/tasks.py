@@ -130,6 +130,7 @@ class TaskAdmin(SummernoteModelAdmin):
 # ----------------------------------------------------------------------------------------------------------------------
 # Option
 class OptionTab(SummernoteModelAdminMixin, admin.TabularInline):
+    fields = ('text', 'is_correct', )
     model = Option
     extra = 0
 

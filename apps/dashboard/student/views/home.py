@@ -40,6 +40,10 @@ def student_view(request):
         if user_subject:
             completed_chapter_count = user_subject.user_chapters.filter(is_completed=True).count()
             completed_lesson_count = user_subject.user_lessons.filter(is_completed=True).count()
+            quarter_lessons = (
+                user_subject.user_lessons.filter(lesson__lesson_type='quarter').order_by('lesson__quarter'))
+        else:
+            quarter_lessons = []
 
         subject_students = UserSubject.objects.filter(subject=subject).select_related('user')[:3]
 
@@ -50,6 +54,7 @@ def student_view(request):
             'first_lesson': first_lesson,
             'completed_chapter_count': completed_chapter_count,
             'completed_lesson_count': completed_lesson_count,
+            'quarter_lessons': quarter_lessons,
             'students': subject_students,
         })
 

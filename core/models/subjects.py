@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models.aggregates import Sum
 from django.utils.translation import gettext_lazy as _
 from core.models import User
 
@@ -52,6 +53,13 @@ class Lesson(models.Model):
         ('quarter', _('Тоқсан')),
     )
 
+    QUARTER = (
+        ('1', _('1-тоқсан')),
+        ('2', _('2-тоқсан')),
+        ('3', _('3-тоқсан')),
+        ('4', _('4-тоқсан')),
+    )
+
     subject = models.ForeignKey(
         Subject, on_delete=models.CASCADE,
         verbose_name=_('Пән'), related_name='lessons', null=True, blank=True
@@ -62,6 +70,7 @@ class Lesson(models.Model):
     )
     title = models.CharField(_('Тақырыбы'), max_length=255)
     lesson_type = models.CharField(_('Сабақ түрі'), max_length=32, choices=LESSON_TYPE, default='lesson')
+    quarter = models.CharField(_('Тоқсан'), max_length=16, choices=QUARTER, default='1')
     description = models.TextField(_('Анықтамасы'), blank=True, null=True)
     date_created = models.DateTimeField(_('Date created'), auto_now_add=True)
     last_update = models.DateTimeField(_('Last update'), auto_now=True)
@@ -69,6 +78,10 @@ class Lesson(models.Model):
 
     def __str__(self):
         return self.title[:64]
+
+    @property
+    def max_rating(self):
+        return self.tasks.aggregate(total=Sum('rating'))['total'] or 0
 
     class Meta:
         verbose_name = _('Сабақ')
