@@ -1,0 +1,223 @@
+{% extends 'layouts/base_layout.html' %}
+
+
+{% block title %}{{ subject.name }}{% endblock %}
+
+
+{% block base_layout %}
+<div class="max-w-screen-xl py-6 px-4 mx-auto grid gap-8">
+    <div class="grid gap-4 border border-border-200 rounded-xl p-4">
+        <!-- Пән және орташа прогресстер -->
+        <div class="grid gap-4 border-b border-border-200">
+            <div class="flex justify-between items-center">
+                <h1 class="text-xl md:text-2xl lg:text-3xl xl:text-4xl font-medium">{{ subject.name }}</h1>
+                
+                <form method="get">
+                    <select 
+                        id="class-select" 
+                        name="class" 
+                        class="w-42 border border-border-200 p-2 rounded-lg" 
+                        onchange="this.form.submit()"
+                    >
+                        <option value="">Барлық сыныптар</option>
+                        {% for code, name in available_classes %}
+                        <option value="{{ code }}" {% if code == selected_class %}selected{% endif %}>
+                            {{ name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </form>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                <div class="p-4 rounded-lg bg-primary-600 text-white">
+                    <h3 class="text-xl font-medium">Бөлімдер</h3>
+                    <p>Барлығы: {{ statistics.total_chapters }}</p>
+                    <p>Орындалған: {{ statistics.completed_chapters }}</p>
+                </div>
+
+                <div class="p-4 rounded-lg bg-primary-600 text-white">
+                    <h3 class="text-xl font-medium">Сабақтар</h3>
+                    <p>Барлығы: {{ statistics.total_lessons }}</p>
+                    <p>Орындалған: {{ statistics.completed_lessons }}</p>
+                </div>
+
+                <div class="p-4 rounded-lg bg-primary-600 text-white">
+                    <h3 class="text-xl font-medium">Орташа прогресс</h3>
+                    <p>{{ statistics.user_subject_avg_percentage }}%</p>
+                </div>
+
+                <div class="p-4 rounded-lg bg-primary-600 text-white">
+                    <h3 class="text-xl font-medium">Орташа баға</h3>
+                    <p>{{ statistics.user_subject_avg_rating }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Пән нәтижелері -->
+        <div class="grid gap-4 border-b border-border-200 pb-4">
+            <h1 class="text-2xl font-medium">Пән нәтижелері</h1>
+
+            <div class="flex justify-between gap-4">
+                <div class="flex flex-col items-center gap-2">
+                    <h1 class="font-medium">Пән бойынша</h1>
+                    <div 
+                        class="radial-progress bg-secondary-100 text-3xl text-primary-600"
+                        style="--value: {{ statistics.user_subject_avg_percentage|floatformat:0 }}; --size: 8rem;" 
+                        aria-valuenow="{{ statistics.user_subject_avg_percentage|floatformat:0 }}" role="progressbar"
+                    >
+                        {{ statistics.user_subject_avg_percentage|floatformat:0 }}%
+                    </div>
+
+                    <div>
+                        <div class="inline-flex items-center gap-2 bg-secondary-100 font-medium py-2 px-4 rounded-xl">
+                            <svg class="w-5 h-5 text-amber-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24"
+                                height="24" fill="currentColor" viewBox="0 0 24 24">
+                                <path
+                                    d="M13.849 4.22c-.684-1.626-3.014-1.626-3.698 0L8.397 8.387l-4.552.361c-1.775.14-2.495 2.331-1.142 3.477l3.468 2.937-1.06 4.392c-.413 1.713 1.472 3.067 2.992 2.149L12 19.35l3.897 2.354c1.52.918 3.405-.436 2.992-2.15l-1.06-4.39 3.468-2.938c1.353-1.146.633-3.336-1.142-3.477l-4.552-.36-1.754-4.17Z" />
+                            </svg>
+                            <span>{{ statistics.user_subject_avg_rating|floatformat:0 }} балл</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col items-center gap-2">
+                    <h1 class="font-medium">Бөлім бойынша</h1>
+                    <div 
+                        class="radial-progress bg-secondary-100 text-3xl text-primary-600"
+                        style="--value: {{ statistics.user_chapter_avg_percentage|floatformat:0 }}; --size: 8rem;" 
+                        aria-valuenow="{{ statistics.user_chapter_avg_percentage|floatformat:0 }}" role="progressbar"
+                    >
+                        {{ statistics.user_chapter_avg_percentage|floatformat:0 }}%
+                    </div>
+
+                    <div>
+                        <div class="inline-flex items-center gap-2 bg-secondary-100 font-medium py-2 px-4 rounded-xl">
+                            <svg class="w-5 h-5 text-amber-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24"
+                                height="24" fill="currentColor" viewBox="0 0 24 24">
+                                <path
+                                    d="M13.849 4.22c-.684-1.626-3.014-1.626-3.698 0L8.397 8.387l-4.552.361c-1.775.14-2.495 2.331-1.142 3.477l3.468 2.937-1.06 4.392c-.413 1.713 1.472 3.067 2.992 2.149L12 19.35l3.897 2.354c1.52.918 3.405-.436 2.992-2.15l-1.06-4.39 3.468-2.938c1.353-1.146.633-3.336-1.142-3.477l-4.552-.36-1.754-4.17Z" />
+                            </svg>
+                            <span>{{ statistics.user_chapter_avg_rating|floatformat:0 }} балл</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col items-center gap-2">
+                    <h1 class="font-medium">Сабақ бойынша</h1>
+                    <div 
+                        class="radial-progress bg-secondary-100 text-3xl text-primary-600"
+                        style="--value: {{ statistics.user_lesson_avg_percentage|floatformat:0 }}; --size: 8rem;" 
+                        aria-valuenow="{{ statistics.user_lesson_avg_percentage|floatformat:0 }}" role="progressbar"
+                    >
+                        {{ statistics.user_lesson_avg_percentage|floatformat:0 }}%
+                    </div>
+
+                    <div>
+                        <div class="inline-flex items-center gap-2 bg-secondary-100 font-medium py-2 px-4 rounded-xl">
+                            <svg class="w-5 h-5 text-amber-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24"
+                                height="24" fill="currentColor" viewBox="0 0 24 24">
+                                <path
+                                    d="M13.849 4.22c-.684-1.626-3.014-1.626-3.698 0L8.397 8.387l-4.552.361c-1.775.14-2.495 2.331-1.142 3.477l3.468 2.937-1.06 4.392c-.413 1.713 1.472 3.067 2.992 2.149L12 19.35l3.897 2.354c1.52.918 3.405-.436 2.992-2.15l-1.06-4.39 3.468-2.938c1.353-1.146.633-3.336-1.142-3.477l-4.552-.36-1.754-4.17Z" />
+                            </svg>
+                            <span>{{ statistics.user_lesson_avg_rating|floatformat:0 }} балл</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- БЖБ және ТЖБ бойынша жиынтық бағалау -->
+        <div class="grid gap-4 border-b border-border-200 pb-4">
+            <div class="flex items-center justify-between">
+                <h1 class="text-2xl font-medium">БЖБ және ТЖБ бойынша жиынтық бағалау</h1>
+                
+                <form method="get">
+                    <select 
+                        name="quarter" 
+                        onchange="this.form.submit()" 
+                        class="w-28 border border-border-200 p-2 rounded-lg">
+                        {% for q in quarters %}
+                        <option value="{{ q }}" {% if q == selected_quarter %}selected{% endif %}>
+                            {{ q }} тоқсан
+                        </option>
+                        {% endfor %}
+                    </select>
+                </form>
+            </div>
+            <table class="w-full border border-border-200">
+                <thead class="bg-secondary-100">
+                    <tr>
+                        <th class="border border-border-200 p-2">№</th>
+                        <th class="border border-border-200 p-2">Сабақ атауы</th>
+                        <th class="border border-border-200 p-2">Түрі</th>
+                        <th class="border border-border-200 p-2">Оқушы</th>
+                        <th class="border border-border-200 p-2">Макс. балл</th>
+                        <th class="border border-border-200 p-2">0–39%</th>
+                        <th class="border border-border-200 p-2">40–84%</th>
+                        <th class="border border-border-200 p-2">85–100%</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in report_data %}
+                    <tr>
+                        <td class="border border-border-200 p-2">{{ forloop.counter }}</td>
+                        <td class="border border-border-200 p-2">{{ row.lesson.title }}</td>
+                        <td class="border border-border-200 p-2">{{ row.lesson_type }}</td>
+                        <td class="border border-border-200 p-2 text-center">{{ row.students_count }}</td>
+                        <td class="border border-border-200 p-2 text-center">{{ row.max_score }}</td>
+                        <td class="border border-border-200 p-2 text-center bg-red-300">{{ row.low }}</td>
+                        <td class="border border-border-200 p-2 text-center bg-amber-300">{{ row.mid }}</td>
+                        <td class="border border-border-200 p-2 text-center bg-green-300">{{ row.high }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center py-2">Бұл тоқсанда жиынтық сабақтар жоқ</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+
+        <div class="grid gap-4">
+            <h2 class="text-2xl font-medium">Оқушылар тізімі</h2>
+            
+            <table class="w-full border border-border-200">
+                <thead class="bg-gray-100">
+                    <tr>
+                        <th class="border border-border-200 p-2">№</th>
+                        <th class="border border-border-200 p-2">Оқушы</th>
+                        <th class="border border-border-200 p-2">Сынып</th>
+                        <th class="border border-border-200 p-2">Пән (%)</th>
+                        <th class="border border-border-200 p-2">Пән бағасы</th>
+                        <th class="border border-border-200 p-2">Бөлім (%)</th>
+                        <th class="border border-border-200 p-2">Бөлім бағасы (&tilde; 10)</th>
+                        <th class="border border-border-200 p-2">Сабақ (%)</th>
+                        <th class="border border-border-200 p-2">Сабақ бағасы (&tilde; 10)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in students_data %}
+                        <tr>
+                            <td class="border border-border-200 p-2 text-center">{{ forloop.counter }}</td>
+                            <td class="border border-border-200 p-2">{{ s.student.get_full_name }}</td>
+                            <td class="border border-border-200 p-2 text-center">{{ s.student.get_user_class_display }}</td>
+                            <td class="border border-border-200 p-2 text-center">{{ s.user_subject.percentage }}%</td>
+                            <td class="border border-border-200 p-2 text-center">{{ s.user_subject.rating }}</td>
+                            <td class="border border-border-200 p-2 text-center">{{ s.chapter_avg_percentage }}%</td>
+                            <td class="border border-border-200 p-2 text-center">{{ s.chapter_avg_rating }}</td>
+                            <td class="border border-border-200 p-2 text-center">{{ s.lesson_avg_percentage }}%</td>
+                            <td class="border border-border-200 p-2 text-center">{{ s.lesson_avg_rating }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="9" class="text-center py-8">Бұл пәнге тіркелген оқушылар жоқ</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock base_layout %}

@@ -49,8 +49,8 @@ class Chapter(models.Model):
 class Lesson(models.Model):
     LESSON_TYPE = (
         ('lesson', _('Сабақ')),
-        ('chapter', _('Бөлім')),
-        ('quarter', _('Тоқсан')),
+        ('chapter', _('БЖБ')),
+        ('quarter', _('ТЖБ')),
     )
 
     QUARTER = (
