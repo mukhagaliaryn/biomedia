@@ -189,8 +189,8 @@
                         <th class="border border-border-200 p-2">№</th>
                         <th class="border border-border-200 p-2">Оқушы</th>
                         <th class="border border-border-200 p-2">Сынып</th>
-                        <th class="border border-border-200 p-2">Пән (%)</th>
                         <th class="border border-border-200 p-2">Пән бағасы</th>
+                        <th class="border border-border-200 p-2">Пән (%)</th>
                         <th class="border border-border-200 p-2">Бөлім (%)</th>
                         <th class="border border-border-200 p-2">Бөлім бағасы (&tilde; 10)</th>
                         <th class="border border-border-200 p-2">Сабақ (%)</th>
@@ -203,8 +203,8 @@
                             <td class="border border-border-200 p-2 text-center">{{ forloop.counter }}</td>
                             <td class="border border-border-200 p-2">{{ s.student.get_full_name }}</td>
                             <td class="border border-border-200 p-2 text-center">{{ s.student.get_user_class_display }}</td>
-                            <td class="border border-border-200 p-2 text-center">{{ s.user_subject.percentage }}%</td>
                             <td class="border border-border-200 p-2 text-center">{{ s.user_subject.rating }}</td>
+                            <td class="border border-border-200 p-2 text-center">{{ s.quarter_avg_percentage }}%</td>
                             <td class="border border-border-200 p-2 text-center">{{ s.chapter_avg_percentage }}%</td>
                             <td class="border border-border-200 p-2 text-center">{{ s.chapter_avg_rating }}</td>
                             <td class="border border-border-200 p-2 text-center">{{ s.lesson_avg_percentage }}%</td>

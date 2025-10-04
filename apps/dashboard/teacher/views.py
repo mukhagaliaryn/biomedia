@@ -171,16 +171,19 @@ def subject_manage_view(request, subject_id):
         user_chapters = us.user_chapters.all()
         user_lessons = us.user_lessons.all()
 
-        # әр оқушының жеке орташа мәндері
         avg_chapter_percentage = user_chapters.aggregate(avg=Avg('percentage'))['avg'] or 0
         avg_chapter_rating = user_chapters.aggregate(avg=Avg('rating'))['avg'] or 0
         avg_lesson_percentage = user_lessons.aggregate(avg=Avg('percentage'))['avg'] or 0
         avg_lesson_rating = user_lessons.aggregate(avg=Avg('rating'))['avg'] or 0
 
+        quarter_lessons = user_lessons.filter(lesson__lesson_type='quarter')
+        avg_quarter_percentage = quarter_lessons.aggregate(avg=Avg('percentage'))['avg'] or 0
+
         students_data.append({
             'student': us.user,
             'user_class': us.user.user_class,
             'user_subject': us,
+            'quarter_avg_percentage': round(avg_quarter_percentage, 2),
             'chapter_avg_percentage': round(avg_chapter_percentage, 2),
             'chapter_avg_rating': round(avg_chapter_rating, 2),
             'lesson_avg_percentage': round(avg_lesson_percentage, 2),
