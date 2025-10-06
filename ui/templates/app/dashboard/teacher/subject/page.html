@@ -156,6 +156,32 @@
                     {% endfor %}
                 </tbody>
             </table>
+
+            <div class="grid grid-cols-3 gap-4">
+                <div class="grid gap-2">
+                    <p class="font-medium">Орташа ФБ+БЖБ</p>
+                    <div class="w-full bg-secondary-100 rounded-full h-3">
+                        <div class="h-full rounded-full" style="width: {{ averages.fb_bjb_progress|floatformat:0 }}%; background: #059669;"></div>
+                    </div>
+                    <p class="text-xs">{{ averages.fb_bjb_avg }}/50 ({{ averages.fb_bjb_progress }}%)</p>
+                </div>
+            
+                <div class="grid gap-2">
+                    <p class="font-medium">Орташа ТЖБ</p>
+                    <div class="w-full bg-secondary-100 rounded-full h-3">
+                        <div class="h-full rounded-full" style="width: {{ averages.tjb_progress|floatformat:0 }}%; background: #059669;"></div>
+                    </div>
+                    <p class="text-xs">{{ averages.tjb_avg }}/50 ({{ averages.tjb_progress }}%)</p>
+                </div>
+            
+                <div class="grid gap-2">
+                    <p class="font-medium">Орташа жиынтық</p>
+                    <div class="w-full bg-secondary-100 rounded-full h-3">
+                        <div class="h-full rounded-full" style="width: {{ averages.total_progress|floatformat:0 }}%; background: #059669;"></div>
+                    </div>
+                    <p class="text-xs">{{ averages.total_avg }}%</p>
+                </div>
+            </div>
         </div>
 
         <!-- Оқушылардың тоқсандық бағалар кестесі -->

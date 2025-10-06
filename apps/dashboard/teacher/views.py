@@ -237,6 +237,10 @@ def subject_manage_view(request, subject_id):
     else:
         fb_bjb_avg = tjb_avg = total_avg = mark_avg = 0
 
+    fb_bjb_progress = round(fb_bjb_avg * 2, 2)
+    tjb_progress = round(tjb_avg * 2, 2)
+    total_progress = round(total_avg, 2)
+
     # -------------------- Контекст --------------------
     context = {
         'subject': subject,
@@ -261,6 +265,10 @@ def subject_manage_view(request, subject_id):
             'tjb_avg': round(tjb_avg, 2),
             'total_avg': round(total_avg, 2),
             'mark_avg': round(mark_avg, 2),
+
+            'fb_bjb_progress': fb_bjb_progress,
+            'tjb_progress': tjb_progress,
+            'total_progress': total_progress,
         }
     }
 
