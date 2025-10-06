@@ -1,6 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
-from django.db.models.aggregates import Avg, Sum
+from django.db.models.aggregates import Avg, Sum, Count
 from django.shortcuts import render, get_object_or_404
 
 from core.models import Subject, UserSubject, UserChapter, UserLesson, User, Lesson, Chapter
@@ -57,7 +57,6 @@ def teacher_view(request):
     return render(request, 'app/dashboard/teacher/page.html', context)
 
 
-
 # Subject manage page
 # ----------------------------------------------------------------------------------------------------------------------
 @login_required
@@ -66,39 +65,22 @@ def subject_manage_view(request, subject_id):
     subject = get_object_or_404(Subject, pk=subject_id)
 
     # -------------------- Фильтр параметрлері --------------------
-    selected_class = request.GET.get('class')
-    try:
-        selected_quarter = int(request.GET.get('quarter', 1))
-    except ValueError:
-        selected_quarter = 1
+    selected_class = request.GET.get('class') or ''
+    selected_quarter = request.GET.get('quarter') or '1'
+    selected_quarter = str(selected_quarter)
+    if selected_quarter not in {'1', '2', '3', '4'}:
+        selected_quarter = '1'
 
-    # -------------------- UserSubject (сынып фильтрімен) --------------------
+    # UserSubject (сынып фильтрімен)
     user_subjects = (
-        UserSubject.objects
-        .filter(subject=subject)
-        .select_related('user', 'subject')
-        .prefetch_related('user_chapters', 'user_lessons')
+        UserSubject.objects.filter(subject=subject).select_related('user', 'subject')
     )
     if selected_class:
         user_subjects = user_subjects.filter(user__user_class=selected_class)
 
-    # -------------------- Орташа статистика --------------------
-    user_subject_stats = user_subjects.aggregate(
-        avg_percentage=Avg('percentage'),
-        avg_rating=Avg('rating')
-    )
-    user_chapter_stats = UserChapter.objects.filter(user_subject__in=user_subjects).aggregate(
-        avg_percentage=Avg('percentage'),
-        avg_rating=Avg('rating')
-    )
-    user_lesson_stats = UserLesson.objects.filter(user_subject__in=user_subjects).aggregate(
-        avg_percentage=Avg('percentage'),
-        avg_rating=Avg('rating')
-    )
+    total_students = user_subjects.count()
 
-    def safe_round(v): return round(v, 2) if v is not None else 0
-
-    # -------------------- Қол жетімді сыныптар --------------------
+    # Қол жетімді сыныптар
     available_classes = [
         (c, dict(User.USER_CLASS).get(c, c))
         for c in (
@@ -110,26 +92,35 @@ def subject_manage_view(request, subject_id):
         )
     ]
 
-    # -------------------- Бөлімдер мен сабақтар санау --------------------
-    total_students = user_subjects.count()
-    total_chapters = Chapter.objects.filter(subject=subject).count()
-    total_lessons = Lesson.objects.filter(subject=subject).count()
+    # -------------------- Прогресс сандары --------------------
+    # Барлық бөлімдер мен сабақтар
+    chapters = Chapter.objects.filter(subject=subject)
+    lessons = Lesson.objects.filter(subject=subject, lesson_type='lesson', quarter=selected_quarter)
 
-    completed_chapters = 0
-    for chapter in Chapter.objects.filter(subject=subject):
-        done = UserChapter.objects.filter(
-            user_subject__in=user_subjects, chapter=chapter, is_completed=True
-        ).count()
-        if total_students > 0 and done == total_students:
-            completed_chapters += 1
+    total_chapters = chapters.count()
+    total_lessons = lessons.count()
 
-    completed_lessons = 0
-    for lesson in Lesson.objects.filter(subject=subject):
-        done = UserLesson.objects.filter(
-            user_subject__in=user_subjects, lesson=lesson, is_completed=True
-        ).count()
-        if total_students > 0 and done == total_students:
-            completed_lessons += 1
+    # Барлық оқушылар толық аяқтаған бөлімдер
+    if total_students > 0:
+        completed_chapters = (
+            UserChapter.objects.filter(user_subject__in=user_subjects, chapter__in=chapters, is_completed=True)
+            .values('chapter').annotate(cnt=Count('chapter')).filter(cnt=total_students).count()
+        )
+        # Барлық оқушылар толық аяқтаған сабақтар
+        completed_lessons = (
+            UserLesson.objects.filter(user_subject__in=user_subjects, lesson__in=lessons, is_completed=True)
+            .values('lesson').annotate(cnt=Count('lesson')).filter(cnt=total_students).count()
+        )
+    else:
+        completed_chapters = 0
+        completed_lessons = 0
+
+    # Орташа пайызбен баға
+    user_subjects_avg = user_subjects.aggregate(avg_percentage=Avg('percentage'), avg_rating=Avg('rating'))
+
+    def safe_round(v):
+        return round(v, 2) if v is not None else 0
+
 
     # -------------------- Тоқсандық БЖБ/ТЖБ есеп кестесі --------------------
     lessons = Lesson.objects.filter(
@@ -140,11 +131,8 @@ def subject_manage_view(request, subject_id):
 
     report_data = []
     for lesson in lessons:
-        # 🔹 Сынып фильтрі UserLesson арқылы да қолданылады
-        ul_qs = UserLesson.objects.filter(
-            user_subject__in=user_subjects,
-            lesson=lesson
-        )
+        # Сынып фильтрі UserLesson арқылы да қолданылады
+        ul_qs = UserLesson.objects.filter(user_subject__in=user_subjects, lesson=lesson)
 
         students_count = ul_qs.values('user_subject_id').distinct().count()
         max_score = getattr(lesson, 'max_rating', None)
@@ -165,53 +153,115 @@ def subject_manage_view(request, subject_id):
             'high': high,
         })
 
-    # -------------------- Жеке оқушылардың көрсеткіштері --------------------
+    # -------------------- Оқушылардың тоқсандық бағалар кестесі --------------------
+    chapter_lessons = (
+        Lesson.objects.filter(subject=subject, lesson_type='chapter', quarter=selected_quarter).order_by('order')
+    )
+    quarter_lesson = Lesson.objects.filter(subject=subject, lesson_type='quarter', quarter=selected_quarter).first()
+
+    # Оқушылар
     students_data = []
     for us in user_subjects:
-        user_chapters = us.user_chapters.all()
-        user_lessons = us.user_lessons.all()
+        lessons_qs = UserLesson.objects.filter(
+            user_subject=us,
+            lesson__quarter=selected_quarter
+        ).select_related('lesson')
 
-        avg_chapter_percentage = user_chapters.aggregate(avg=Avg('percentage'))['avg'] or 0
-        avg_chapter_rating = user_chapters.aggregate(avg=Avg('rating'))['avg'] or 0
-        avg_lesson_percentage = user_lessons.aggregate(avg=Avg('percentage'))['avg'] or 0
-        avg_lesson_rating = user_lessons.aggregate(avg=Avg('rating'))['avg'] or 0
+        # Формативті (lesson типі)
+        lesson_grades = list(lessons_qs.filter(lesson__lesson_type='lesson').values_list('rating', flat=True))
+        lesson_score_sum = sum([g for g in lesson_grades if g is not None])
+        lesson_count = len(lesson_grades)
 
-        quarter_lessons = user_lessons.filter(lesson__lesson_type='quarter')
-        avg_quarter_percentage = quarter_lessons.aggregate(avg=Avg('percentage'))['avg'] or 0
+        # БЖБ (chapter типі)
+        chapter_grades = []
+        chapter_score_sum = 0
+        for ch in chapter_lessons:
+            grade = lessons_qs.filter(lesson=ch).values_list('rating', flat=True).first()
+            grade_val = grade if grade is not None else 0
+            chapter_grades.append(grade if grade is not None else '-')
+            chapter_score_sum += grade_val
 
+        # ТЖБ (quarter типі)
+        quarter_grade = None
+        if quarter_lesson:
+            quarter_grade = lessons_qs.filter(lesson=quarter_lesson).values_list('rating', flat=True).first()
+            quarter_max = getattr(quarter_lesson, 'max_rating', 0) or 0
+        else:
+            quarter_max = 0
+
+        # Макс. мәндер
+        chapter_max_sum = sum([getattr(ch, 'max_rating', 0) or 0 for ch in chapter_lessons])
+        lesson_max_sum = lesson_count * 10  # әр lesson 10 баллдық деп алынады
+
+        # Есептеу формулалары
+        fb_bjb_percent = 0
+        if (chapter_max_sum + lesson_max_sum) > 0:
+            fb_bjb_percent = ((chapter_score_sum + lesson_score_sum) / (chapter_max_sum + lesson_max_sum)) * 50
+
+        tjb_percent = 0
+        if quarter_grade and quarter_max:
+            tjb_percent = (quarter_grade / quarter_max) * 50
+
+        total_percent = fb_bjb_percent + tjb_percent
+        if total_percent > 100:
+            total_percent = 100
+
+        # Тоқсандық баға (5 балдық шкала)
+        if total_percent < 40:
+            quarter_mark = 2
+        elif total_percent < 70:
+            quarter_mark = 3
+        elif total_percent < 85:
+            quarter_mark = 4
+        else:
+            quarter_mark = 5
+
+        # Қорытынды
         students_data.append({
             'student': us.user,
-            'user_class': us.user.user_class,
-            'user_subject': us,
-            'quarter_avg_percentage': round(avg_quarter_percentage, 2),
-            'chapter_avg_percentage': round(avg_chapter_percentage, 2),
-            'chapter_avg_rating': round(avg_chapter_rating, 2),
-            'lesson_avg_percentage': round(avg_lesson_percentage, 2),
-            'lesson_avg_rating': round(avg_lesson_rating, 2),
+            'lesson_grades': lesson_grades,
+            'chapter_grades': chapter_grades,
+            'quarter_grade': quarter_grade or '-',
+            'fb_bjb_percent': round(fb_bjb_percent, 2),
+            'tjb_percent': round(tjb_percent, 2),
+            'total_percent': round(total_percent, 2),
+            'quarter_mark': quarter_mark,
         })
+
+    # -------------------- Орташа мәндер (фильтрге сәйкес) --------------------
+    if students_data:
+        fb_bjb_avg = sum(s['fb_bjb_percent'] for s in students_data) / len(students_data)
+        tjb_avg = sum(s['tjb_percent'] for s in students_data) / len(students_data)
+        total_avg = sum(s['total_percent'] for s in students_data) / len(students_data)
+        mark_avg = sum(s['quarter_mark'] for s in students_data) / len(students_data)
+    else:
+        fb_bjb_avg = tjb_avg = total_avg = mark_avg = 0
 
     # -------------------- Контекст --------------------
     context = {
         'subject': subject,
-        'user_subjects': user_subjects,
         'available_classes': available_classes,
         'selected_class': selected_class,
         'selected_quarter': selected_quarter,
-        'quarters': [1, 2, 3, 4],
-        'report_data': report_data,
-        'students_data': students_data,
-        'statistics': {
-            'user_subject_avg_percentage': safe_round(user_subject_stats['avg_percentage']),
-            'user_subject_avg_rating': safe_round(user_subject_stats['avg_rating']),
-            'user_chapter_avg_percentage': safe_round(user_chapter_stats['avg_percentage']),
-            'user_chapter_avg_rating': safe_round(user_chapter_stats['avg_rating']),
-            'user_lesson_avg_percentage': safe_round(user_lesson_stats['avg_percentage']),
-            'user_lesson_avg_rating': safe_round(user_lesson_stats['avg_rating']),
+        'quarters': ['1', '2', '3', '4'],
+        'generics': {
             'total_chapters': total_chapters,
             'completed_chapters': completed_chapters,
             'total_lessons': total_lessons,
             'completed_lessons': completed_lessons,
+            'user_subjects_avg_percentage': safe_round(user_subjects_avg['avg_percentage']),
+            'user_subjects_avg_rating': safe_round(user_subjects_avg['avg_rating']),
         },
+        'report_data': report_data,
+        'chapter_lessons': chapter_lessons,
+        'quarter_lesson': quarter_lesson,
+        'students_data': students_data,
+        'averages': {
+            'fb_bjb_avg': round(fb_bjb_avg, 2),
+            'tjb_avg': round(tjb_avg, 2),
+            'total_avg': round(total_avg, 2),
+            'mark_avg': round(mark_avg, 2),
+        }
     }
 
     return render(request, 'app/dashboard/teacher/subject/page.html', context)
