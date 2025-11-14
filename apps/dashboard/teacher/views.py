@@ -207,11 +207,11 @@ def subject_manage_view(request, subject_id):
             total_percent = 100
 
         # Тоқсандық баға (5 балдық шкала)
-        if total_percent < 40:
+        if total_percent <= 40:
             quarter_mark = 2
-        elif total_percent < 70:
+        elif total_percent <= 65:
             quarter_mark = 3
-        elif total_percent < 85:
+        elif total_percent <= 85:
             quarter_mark = 4
         else:
             quarter_mark = 5
