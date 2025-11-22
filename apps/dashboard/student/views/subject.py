@@ -166,8 +166,6 @@ def lesson_finish_handler(request, subject_id, chapter_id, lesson_id):
         user_rating = user_tasks.aggregate(total=Sum('rating'))['total'] or 0
         max_rating = lesson.tasks.aggregate(total=Sum('rating'))['total'] or 0
 
-        print(user_rating)
-        print(max_rating)
         user_lesson.rating = user_rating
         user_lesson.percentage = round((user_rating / max_rating) * 100, 2)
         chapter_lessons = UserLesson.objects.filter(

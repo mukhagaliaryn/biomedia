@@ -73,7 +73,9 @@ def subject_manage_view(request, subject_id):
 
     # UserSubject (сынып фильтрімен)
     user_subjects = (
-        UserSubject.objects.filter(subject=subject).select_related('user', 'subject')
+        UserSubject.objects.filter(subject=subject)
+        .select_related('user', 'subject')
+        .order_by('user__first_name', 'user__last_name',)
     )
     if selected_class:
         user_subjects = user_subjects.filter(user__user_class=selected_class)
