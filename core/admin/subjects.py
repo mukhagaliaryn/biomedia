@@ -19,7 +19,7 @@ class ChapterTab(admin.TabularInline):
 # Lesson Tab
 class LessonTab(SummernoteModelAdminMixin, admin.TabularInline):
     model = Lesson
-    fields = ('order', 'title', 'chapter', 'lesson_type', 'quarter', 'view_link', )
+    fields = ('lesson_number', 'title', 'chapter', 'lesson_type', 'quarter', 'order', 'view_link', )
     extra = 0
     readonly_fields = ('view_link', )
 
