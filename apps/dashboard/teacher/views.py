@@ -142,7 +142,8 @@ def subject_manage_view(request, subject_id):
             max_score = lesson.tasks.aggregate(total=Sum('rating'))['total'] or 0
 
         low  = ul_qs.filter(percentage__lt=40).count()
-        mid  = ul_qs.filter(percentage__gte=40, percentage__lt=85).count()
+        mid  = ul_qs.filter(percentage__gte=40, percentage__lt=65).count()
+        mid2  = ul_qs.filter(percentage__gte=65, percentage__lt=85).count()
         high = ul_qs.filter(percentage__gte=85).count()
 
         report_data.append({
@@ -152,6 +153,7 @@ def subject_manage_view(request, subject_id):
             'max_score': max_score,
             'low': low,
             'mid': mid,
+            'mid2': mid2,
             'high': high,
         })
 

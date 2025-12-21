@@ -134,7 +134,8 @@
                         <th class="border border-border-200 p-2">Оқушы саны</th>
                         <th class="border border-border-200 p-2">Макс. балл</th>
                         <th class="border border-border-200 p-2">0–39%</th>
-                        <th class="border border-border-200 p-2">40–84%</th>
+                        <th class="border border-border-200 p-2">40–64%</th>
+                        <th class="border border-border-200 p-2">65–84%</th>
                         <th class="border border-border-200 p-2">85–100%</th>
                     </tr>
                 </thead>
@@ -147,6 +148,7 @@
                             <td class="border border-border-200 p-2 text-center">{{ row.max_score }}</td>
                             <td class="border border-border-200 p-2 text-center bg-red-300">{{ row.low }}</td>
                             <td class="border border-border-200 p-2 text-center bg-amber-300">{{ row.mid }}</td>
+                            <td class="border border-border-200 p-2 text-center bg-lime-300">{{ row.mid2 }}</td>
                             <td class="border border-border-200 p-2 text-center bg-green-300">{{ row.high }}</td>
                         </tr>
                     {% empty %}
