@@ -205,11 +205,11 @@ def lesson_finish_handler(request, subject_id, chapter_id, lesson_id):
             l.tasks.aggregate(s=Sum('rating'))['s'] or 0 for l in chapters_in_quarter
         )
 
-        # Бірінші бөлік (50%): (user_sum_lesson+user_sum_chapter)/(max_sum_lesson + max_sum_chapter) * 50
+        # Бірінші бөлік (50%): (user_sum_lesson + user_sum_chapter)/(max_sum_lesson + max_sum_chapter) * 50
         max_value_chapter_and_lesson = max_sum_lesson + max_sum_chapter
         part1 = ((user_sum_lesson + user_sum_chapter) / max_value_chapter_and_lesson) * 50 if max_value_chapter_and_lesson else 0
 
-        #Екінші бөлік(50 %): (quarter_rating / Lesson.rating) * 50
+        #Екінші бөлік(50%): (quarter_rating / Lesson.rating) * 50
         quarter_rating = user_tasks.aggregate(total=Sum('rating'))['total'] or 0
         quarter_max = lesson.max_rating
         part2 = (quarter_rating / quarter_max) * 50 if quarter_max else 0

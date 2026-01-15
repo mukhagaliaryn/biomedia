@@ -141,10 +141,16 @@ def subject_manage_view(request, subject_id):
         if max_score is None:
             max_score = lesson.tasks.aggregate(total=Sum('rating'))['total'] or 0
 
-        low  = ul_qs.filter(percentage__lt=40).count()
-        mid  = ul_qs.filter(percentage__gte=40, percentage__lt=65).count()
-        mid2  = ul_qs.filter(percentage__gte=65, percentage__lt=85).count()
-        high = ul_qs.filter(percentage__gte=85).count()
+        if lesson.lesson_type == 'quarter':
+            low = ul_qs.filter(rating__lt=12).count()
+            mid = ul_qs.filter(rating__gte=12, rating__lt=20).count()
+            mid2 = ul_qs.filter(rating__gte=20, rating__lt=26).count()
+            high = ul_qs.filter(rating__gte=26).count()
+        else:
+            low = ul_qs.filter(percentage__lt=40).count()
+            mid = ul_qs.filter(percentage__gte=40, percentage__lt=65).count()
+            mid2 = ul_qs.filter(percentage__gte=65, percentage__lt=85).count()
+            high = ul_qs.filter(percentage__gte=85).count()
 
         report_data.append({
             'lesson': lesson,
